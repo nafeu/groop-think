@@ -39,6 +39,14 @@ usernameBox.enterKey(function(){
 // ---------------------------------------------------------------------------------------
 // Socket Event Handler Dispatcher
 // ---------------------------------------------------------------------------------------
+socket.on('userConnected', function(data){
+  console.log(">> A user connected! << : ", data);
+});
+
+socket.on('userDisconnected', function(data){
+  console.log(">> A user disconnected! << : ", data);
+});
+
 socket.on('updateNumClients',function(data){
   handleUpdateNumClients(data);
 });
@@ -49,6 +57,7 @@ socket.on('updateMessages', function(data){
 
 socket.on('persistClientData', function(data){
   clientData = data;
+  console.log(">> persisting client data << : ", clientData);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -59,7 +68,7 @@ socket.on('persistClientData', function(data){
 // Socket Event Handlers - UI
 // ---------------------------------------------------------------------------------------
 function handleUpdateNumClients(data) {
-  console.log("<< handling event: [ update num clients ] >> :", data);
+  console.log("!! handling event: [ update num clients ] !! :", data);
   numClients.html(data);
 }
 
@@ -76,6 +85,10 @@ function sendMessage(msg) {
 }
 
 function updateUsername(name) {
+  $.each(clientData, function(item){
+    console.log("item in client data: ... ");
+    console.log(item);
+  });
   // Update local data
   user.name = name;
   // Update UI

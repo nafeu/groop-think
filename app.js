@@ -18,18 +18,20 @@ var serverData = {
 io.on('connection', function(socket){ // IO Socket Connection Start
 // ---------------------------------------------------------------------------------------
 
-// On User Connect
+// On User Connect, SAVE, PERSIST, NOTIFY
 serverData.numClients++;
-broadcastUserConnected();
 saveClient(socket);
+broadcastPersistClientData(serverData.clientData);
+broadcastUserConnected(socket);
 
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on('disconnect', function(){
   serverData.numClients--;
-  broadcastUserDisconnect(socket);
   removeClient(socket);
+  broadcastPersistClientData(serverData.clientData);
+  broadcastUserDisconnect(socket);
 });
 
 socket.on('sendMessage', function(data){
@@ -38,7 +40,6 @@ socket.on('sendMessage', function(data){
 
 socket.on('updateUsername', function(data){
   serverData.clientData[data.id] = data.user;
-  console.log(serverData.clientData);
   // Persist user information across all clients
   broadcastPersistClientData(serverData.clientData);
 });
@@ -54,11 +55,13 @@ socket.on('updateUsername', function(data){
 // ---------------------------------------------------------------------------------------
 // Event Broadcasts
 // ---------------------------------------------------------------------------------------
-function broadcastUserConnected() {
+function broadcastUserConnected(socket) {
+  io.sockets.emit('userConnected', socket.id);
   io.sockets.emit('updateNumClients', serverData.numClients);
 }
 
 function broadcastUserDisconnect(socket) {
+  io.sockets.emit('userDisconnected', socket.id);
   io.sockets.emit('updateNumClients', serverData.numClients);
 }
 
@@ -76,7 +79,7 @@ function broadcastPersistClientData(data) {
 function saveClient(socket) {
   console.log("<< saving client >> : ", socket.id);
   serverData.sockets[socket.id] = socket;
-  serverData.clientData[socket.id] = {};
+  serverData.clientData[socket.id] = { name: socket.id };
 }
 
 function removeClient(socket) {
