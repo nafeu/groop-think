@@ -8,28 +8,32 @@ var io = require('socket.io')(http);
 // ---------------------------------------------------------------------------------------
 app.use(express.static(__dirname + '/public'));
 
-var numClients = 0;
-var numRooms = 1;
+var serverData = {
+  numClients: 0,
+  sockets: {},
+  clientData: {}
+};
 
 // ---------------------------------------------------------------------------------------
 io.on('connection', function(socket){ // IO Socket Connection Start
 // ---------------------------------------------------------------------------------------
 
+// On User Connect
+serverData.numClients++;
 broadcastUserConnected();
-broadcastUserDisconnect(socket);
-
-// console.log(io.nsps['/'].adapter.rooms);
-// if(io.nsps['/'].adapter.rooms["room-" + numRooms] && io.nsps['/'].adapter.rooms["room-" + numRooms].length > 1)
-//   numRooms++;
-// socket.join("room-" + numRooms);
-// //Send this event to everyone in the room.
-// io.sockets.in("room-" + numRooms).emit('connectToRoom', { desc: "You are in room no. " + numRooms });
+saveClient(socket);
 
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on("sendMessage", function(data){
   broadcastUpdateMessages(data);
+});
+
+socket.on('disconnect', function(){
+  serverData.numClients--;
+  broadcastUserDisconnect(socket);
+  removeClient(socket);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -45,21 +49,31 @@ socket.on("sendMessage", function(data){
 // Event Broadcasts
 // ---------------------------------------------------------------------------------------
 function broadcastUserConnected() {
-  numClients++;
-  io.sockets.emit('updateNumClients', numClients);
+  io.sockets.emit('updateNumClients', serverData.numClients);
 }
 
 function broadcastUserDisconnect(socket) {
-  socket.on('disconnect', function () {
-    numClients--;
-    io.sockets.emit('updateNumClients', numClients);
-  });
+  io.sockets.emit('updateNumClients', serverData.numClients);
 }
 
 function broadcastUpdateMessages(data) {
   io.sockets.emit('updateMessages', data);
 }
 
+// ---------------------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------------------
+function saveClient(socket) {
+  console.log("<< saving client >> : ", socket.id);
+  serverData.sockets[socket.id] = socket;
+  serverData.clientData[socket.id] = {};
+}
+
+function removeClient(socket) {
+  console.log("<< removing client >> : ", socket.id);
+  delete serverData.sockets[socket.id];
+  delete serverData.clientData[socket.id];
+}
 // ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------

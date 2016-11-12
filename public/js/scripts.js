@@ -2,6 +2,10 @@
 // Socket Reference Instantiation
 // ---------------------------------------------------------------------------------------
 var socket = io();
+var clientData = {};
+var user = {
+  name: "",
+};
 
 // ---------------------------------------------------------------------------------------
 $(function(){ // Document Ready - Start
@@ -9,9 +13,9 @@ $(function(){ // Document Ready - Start
 
 // DOM Reference Instantiation
 var body = $("#content");
-// var numRooms = $("#num-rooms");
 var numClients = $("#num-clients");
 var chatBox = $("#chat-box");
+var usernameBox = $("#username-box");
 
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
@@ -22,15 +26,16 @@ chatBox.enterKey(function(){
   sendMessage(msg);
 });
 
+usernameBox.enterKey(function(){
+  var newName = usernameBox.val();
+  updateUsername(newName);
+});
+
 // ---------------------------------------------------------------------------------------
 // Socket Event Handler Dispatcher
 // ---------------------------------------------------------------------------------------
 socket.on('updateNumClients',function(data){
   handleUpdateNumClients(data);
-});
-
-socket.on('connectToRoom', function(data){
-  handleConnectToRoom(data);
 });
 
 socket.on('updateMessages', function(data){
@@ -40,10 +45,6 @@ socket.on('updateMessages', function(data){
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - Functional
 // ---------------------------------------------------------------------------------------
-function handleConnectToRoom(data) {
-  console.log("<< handling event: [ connect to room ] >> :", data);
-  // numRooms.html(data.desc);
-}
 
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - UI
@@ -53,16 +54,29 @@ function handleUpdateNumClients(data) {
   numClients.html(data);
 }
 
-function printMessage(msg) {
-  body.append($("<p></p>").text(msg));
+function printMessage(data) {
+  body.append($("<p></p>").text(data.message));
 }
 
 // ---------------------------------------------------------------------------------------
 // Event Emitters
 // ---------------------------------------------------------------------------------------
 function sendMessage(msg) {
-  socket.emit('sendMessage', msg);
+  console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
+  socket.emit('sendMessage', { id: socket.id, user: user, message: msg });
 }
+
+// ---------------------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------------------
+// function createPayload(data) {
+//   return {
+//     id: socket.id,
+//     user: user,
+//     data: data
+//   };
+// }
+
 
 // ---------------------------------------------------------------------------------------
 }); // Document Ready - End
