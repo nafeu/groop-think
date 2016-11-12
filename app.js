@@ -12,13 +12,13 @@ var numRooms = 1;
 
 io.on('connection', function(socket){
 
-  console.log(io.nsps['/'].adapter.rooms);
-  if(io.nsps['/'].adapter.rooms["room-" + numRooms] && io.nsps['/'].adapter.rooms["room-" + numRooms].length > 1)
-    numRooms++;
-  socket.join("room-" + numRooms);
+  // console.log(io.nsps['/'].adapter.rooms);
+  // if(io.nsps['/'].adapter.rooms["room-" + numRooms] && io.nsps['/'].adapter.rooms["room-" + numRooms].length > 1)
+  //   numRooms++;
+  // socket.join("room-" + numRooms);
 
-  //Send this event to everyone in the room.
-  io.sockets.in("room-" + numRooms).emit('connectToRoom', { desc: "You are in room no. " + numRooms });
+  // //Send this event to everyone in the room.
+  // io.sockets.in("room-" + numRooms).emit('connectToRoom', { desc: "You are in room no. " + numRooms });
 
   // Broadcast user connection message and information
   broadcastUserConnected();
@@ -35,12 +35,12 @@ http.listen(3000, function(){
 // Helpers
 function broadcastUserConnected() {
   numClients++;
-  io.sockets.emit('broadcast', { desc: numClients + ' clients connected!' });
+  io.sockets.emit('updateNumClients', numClients);
 }
 
 function broadcastUserDisconnect(socket) {
   socket.on('disconnect', function () {
     numClients--;
-    io.sockets.emit('broadcast',{ desc: numClients + ' clients connected!'});
+    io.sockets.emit('updateNumClients', numClients);
   });
 }
