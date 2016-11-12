@@ -26,16 +26,22 @@ saveClient(socket);
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
-socket.on("sendMessage", function(data){
-  broadcastUpdateMessages(data);
-});
-
 socket.on('disconnect', function(){
   serverData.numClients--;
   broadcastUserDisconnect(socket);
   removeClient(socket);
 });
 
+socket.on('sendMessage', function(data){
+  broadcastUpdateMessages(data);
+});
+
+socket.on('updateUsername', function(data){
+  serverData.clientData[data.id] = data.user;
+  console.log(serverData.clientData);
+  // Persist user information across all clients
+  broadcastPersistClientData(serverData.clientData);
+});
 // ---------------------------------------------------------------------------------------
 // Event Emitters
 // ---------------------------------------------------------------------------------------
@@ -58,6 +64,10 @@ function broadcastUserDisconnect(socket) {
 
 function broadcastUpdateMessages(data) {
   io.sockets.emit('updateMessages', data);
+}
+
+function broadcastPersistClientData(data) {
+  io.sockets.emit('persistClientData', data);
 }
 
 // ---------------------------------------------------------------------------------------

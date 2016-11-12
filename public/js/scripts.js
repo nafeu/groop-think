@@ -4,7 +4,7 @@
 var socket = io();
 var clientData = {};
 var user = {
-  name: "",
+  name: "Nafeu",
 };
 
 // ---------------------------------------------------------------------------------------
@@ -16,6 +16,11 @@ var body = $("#content");
 var numClients = $("#num-clients");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
+var userName = $("#user-name");
+
+// Update DOM
+userName.text(user.name);
+
 
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
@@ -42,6 +47,10 @@ socket.on('updateMessages', function(data){
   printMessage(data);
 });
 
+socket.on('persistClientData', function(data){
+  clientData = data;
+});
+
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - Functional
 // ---------------------------------------------------------------------------------------
@@ -55,7 +64,7 @@ function handleUpdateNumClients(data) {
 }
 
 function printMessage(data) {
-  body.append($("<p></p>").text(data.message));
+  body.append($("<p></p>").text(data.user.name + ": " + data.message));
 }
 
 // ---------------------------------------------------------------------------------------
@@ -64,6 +73,16 @@ function printMessage(data) {
 function sendMessage(msg) {
   console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
   socket.emit('sendMessage', { id: socket.id, user: user, message: msg });
+}
+
+function updateUsername(name) {
+  // Update local data
+  user.name = name;
+  // Update UI
+  userName.text(name);
+  // Inform Server
+  console.log("<< emitting event: [ update username ] >> :", socket.id, user );
+  socket.emit('updateUsername', { id: socket.id, user: user });
 }
 
 // ---------------------------------------------------------------------------------------
