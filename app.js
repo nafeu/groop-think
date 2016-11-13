@@ -9,7 +9,6 @@ var io = require('socket.io')(http);
 app.use(express.static(__dirname + '/public'));
 
 var serverData = {
-  numClients: 0,
   sockets: {},
   clientData: {}
 };
@@ -42,6 +41,7 @@ socket.on('updateUsername', function(data){
   serverData.clientData[data.id] = data.user;
   // Persist user information across all clients
   broadcastPersistClientData(serverData.clientData);
+  io.sockets.emit('updateOnlineUsers');
 });
 // ---------------------------------------------------------------------------------------
 // Event Emitters
@@ -57,12 +57,12 @@ socket.on('updateUsername', function(data){
 // ---------------------------------------------------------------------------------------
 function broadcastUserConnected(socket) {
   io.sockets.emit('userConnected', socket.id);
-  io.sockets.emit('updateNumClients', serverData.numClients);
+  io.sockets.emit('updateOnlineUsers');
 }
 
 function broadcastUserDisconnect(socket) {
   io.sockets.emit('userDisconnected', socket.id);
-  io.sockets.emit('updateNumClients', serverData.numClients);
+  io.sockets.emit('updateOnlineUsers');
 }
 
 function broadcastUpdateMessages(data) {

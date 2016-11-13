@@ -13,7 +13,7 @@ $(function(){ // Document Ready - Start
 
 // DOM Reference Instantiation
 var body = $("#content");
-var numClients = $("#num-clients");
+var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
 var userName = $("#user-name");
@@ -53,8 +53,8 @@ socket.on('initializeUser', function(data){
   userName.text(user.name);
 });
 
-socket.on('updateNumClients',function(data){
-  handleUpdateNumClients(data);
+socket.on('updateOnlineUsers',function(){
+  handleUpdateOnlineUsers();
 });
 
 socket.on('updateMessages', function(data){
@@ -73,9 +73,14 @@ socket.on('persistClientData', function(data){
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - UI
 // ---------------------------------------------------------------------------------------
-function handleUpdateNumClients(data) {
-  console.log("!! handling event: [ update num clients ] !! :", data);
-  numClients.html(data);
+function handleUpdateOnlineUsers() {
+  console.log("!! handling event: [ update online users ] !! :");
+  var names = "";
+  $.each(clientData, function(key){
+    names += clientData[key].name + ", ";
+  });
+  onlineUsers.html(names.substr(0, names.length-2));
+  // onlineUsers.html(data);
 }
 
 function printMessage(data) {
@@ -92,7 +97,7 @@ function sendMessage(msg) {
 
 function updateUsername(name) {
   var action = true;
-  $.each(Object.keys(clientData), function(key){
+  $.each(clientData, function(key){
     if (clientData[key].name == name) {
       alert("name is already taken!");
       action = false;
