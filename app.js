@@ -80,6 +80,7 @@ function saveClient(socket) {
   console.log("<< saving client >> : ", socket.id);
   serverData.sockets[socket.id] = socket;
   serverData.clientData[socket.id] = { name: socket.id };
+  socket.emit("initializeUser", { name: socket.id });
 }
 
 function removeClient(socket) {

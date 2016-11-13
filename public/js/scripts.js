@@ -4,7 +4,7 @@
 var socket = io();
 var clientData = {};
 var user = {
-  name: "Nafeu",
+  name: "",
 };
 
 // ---------------------------------------------------------------------------------------
@@ -47,6 +47,12 @@ socket.on('userDisconnected', function(data){
   console.log(">> A user disconnected! << : ", data);
 });
 
+socket.on('initializeUser', function(data){
+  console.log(">> init user << : ", data);
+  user = data;
+  userName.text(user.name);
+});
+
 socket.on('updateNumClients',function(data){
   handleUpdateNumClients(data);
 });
@@ -85,17 +91,22 @@ function sendMessage(msg) {
 }
 
 function updateUsername(name) {
-  $.each(clientData, function(item){
-    console.log("item in client data: ... ");
-    console.log(item);
+  var action = true;
+  $.each(Object.keys(clientData), function(key){
+    if (clientData[key].name == name) {
+      alert("name is already taken!");
+      action = false;
+    }
   });
-  // Update local data
-  user.name = name;
-  // Update UI
-  userName.text(name);
-  // Inform Server
-  console.log("<< emitting event: [ update username ] >> :", socket.id, user );
-  socket.emit('updateUsername', { id: socket.id, user: user });
+  if (action) {
+    // Update local data
+    user.name = name;
+    // Update UI
+    userName.text(name);
+    // Inform Server
+    console.log("<< emitting event: [ update username ] >> :", socket.id, user );
+    socket.emit('updateUsername', { id: socket.id, user: user });
+  }
 }
 
 // ---------------------------------------------------------------------------------------
