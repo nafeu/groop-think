@@ -4,15 +4,17 @@
   <link rel="stylesheet" type="text/css" href="css/styles.css">
   <script src="/socket.io/socket.io.js"></script>
   <body>
-    <div id="content">
-
+    <div id="login">
+      <h1>Please pick a username</h1>
+      <input id="username-box" type="text" placeholder="enter new name">
     </div>
-    <input id="chat-box" type="text" placeholder="enter message">
-    <br>
-    <input id="username-box" type="text" placeholder="enter new name">
-    <!-- <h4 id="num-rooms"></h4> -->
-    <h4>Username: <span id="user-name"></span></h4>
-    <h4>Online users: <span id="online-users">0</span></h4>
+    <div id="content" style="display: none;">
+      <input id="chat-box" type="text" placeholder="enter message">
+      <br>
+      <!-- <h4 id="num-rooms"></h4> -->
+      <h4>Online users: <span id="online-users">0</span></h4>
+      <h4>Username: <span id="user-name"></span></h4>
+    </div>
   </body>
   <script src="js/jquery.min.js"></script>
   <script src="js/jquery.plugins.js"></script>

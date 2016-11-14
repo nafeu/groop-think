@@ -18,31 +18,29 @@ io.on('connection', function(socket){ // IO Socket Connection Start
 // ---------------------------------------------------------------------------------------
 
 // On User Connect, SAVE, PERSIST, NOTIFY
-serverData.numClients++;
 saveClient(socket);
-broadcastPersistClientData(serverData.clientData);
-broadcastUserConnected(socket);
 
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
+socket.on('registerUser', function(data){
+  serverData.clientData[socket.id] = data;
+  broadcastPersistClientData(serverData.clientData);
+  broadcastUserConnected(data);
+});
+
 socket.on('disconnect', function(){
-  serverData.numClients--;
+  var user = serverData.clientData[socket.id];
+  if (user) broadcastUserDisconnect(user);
+  else broadcastUserDisconnect({ name: "a user"});
   removeClient(socket);
   broadcastPersistClientData(serverData.clientData);
-  broadcastUserDisconnect(socket);
 });
 
 socket.on('sendChatMessage', function(data){
   broadcastPrintText(data);
 });
 
-socket.on('updateUsername', function(data){
-  serverData.clientData[data.id] = data.user;
-  // Persist user information across all clients
-  broadcastPersistClientData(serverData.clientData);
-  io.sockets.emit('updateOnlineUsers');
-});
 // ---------------------------------------------------------------------------------------
 // Event Emitters
 // ---------------------------------------------------------------------------------------
@@ -55,15 +53,15 @@ socket.on('updateUsername', function(data){
 // ---------------------------------------------------------------------------------------
 // Event Broadcasts
 // ---------------------------------------------------------------------------------------
-function broadcastUserConnected(socket) {
-  io.sockets.emit('userConnected', socket.id);
-  io.sockets.emit('printText', { type: "update", text: "a user has connected!"});
+function broadcastUserConnected(user) {
+  io.sockets.emit('userConnected', user.name);
+  io.sockets.emit('printText', { type: "update", text: user.name + " has connected!"});
   io.sockets.emit('updateOnlineUsers');
 }
 
-function broadcastUserDisconnect(socket) {
-  io.sockets.emit('userDisconnected', socket.id);
-  io.sockets.emit('printText', { type: "update", text: "a user has disconnected!"});
+function broadcastUserDisconnect(user) {
+  io.sockets.emit('userDisconnected', user.name);
+  io.sockets.emit('printText', { type: "update", text: user.name + " has disconnected!"});
   io.sockets.emit('updateOnlineUsers');
 }
 
@@ -79,10 +77,8 @@ function broadcastPersistClientData(data) {
 // Helpers
 // ---------------------------------------------------------------------------------------
 function saveClient(socket) {
-  console.log("<< saving client >> : ", socket.id);
+  console.log("<< new connection client >> : ", socket.id);
   serverData.sockets[socket.id] = socket;
-  serverData.clientData[socket.id] = { name: socket.id };
-  socket.emit("initializeUser", { name: socket.id });
 }
 
 function removeClient(socket) {

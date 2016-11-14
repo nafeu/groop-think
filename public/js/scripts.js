@@ -32,8 +32,8 @@ chatBox.enterKey(function(){
 });
 
 usernameBox.enterKey(function(){
-  var newName = usernameBox.val();
-  updateUsername(newName);
+  var name = usernameBox.val().trim();
+  registerUser(name);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -100,12 +100,7 @@ function printMessage(message) {
 // ---------------------------------------------------------------------------------------
 // Event Emitters
 // ---------------------------------------------------------------------------------------
-function sendChatMessage(msg) {
-  console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
-  socket.emit('sendChatMessage', { type: "chat", user: user, message: msg });
-}
-
-function updateUsername(name) {
+function registerUser(name) {
   var action = true;
   $.each(clientData, function(key){
     if (clientData[key].name == name) {
@@ -119,9 +114,18 @@ function updateUsername(name) {
     // Update UI
     userName.text(name);
     // Inform Server
-    console.log("<< emitting event: [ update username ] >> :", socket.id, user );
-    socket.emit('updateUsername', { id: socket.id, user: user });
+    console.log("<< emitting event: [ registering user ] >> :", user.name );
+    socket.emit('registerUser', {
+      name: name
+    });
+    $("#login").hide();
+    $("#content").show();
   }
+}
+
+function sendChatMessage(msg) {
+  console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
+  socket.emit('sendChatMessage', { type: "chat", user: user, message: msg });
 }
 
 // ---------------------------------------------------------------------------------------
