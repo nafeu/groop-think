@@ -17,11 +17,15 @@ var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
-var userName = $("#user-name");
+// var userName = $("#user-name");
 
 // Update DOM
-userName.text(user.name);
+// userName.text(user.name);
 
+// Setup UI
+$(window).resize(function () {
+  chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
+});
 
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
@@ -96,6 +100,7 @@ function handleUpdateOnlineUsers() {
 
 function printMessage(message) {
   chat.append($("<p></p>").text(message));
+  chat.scrollTop(chat[0].scrollHeight);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -113,7 +118,7 @@ function registerUser(name) {
     // Update local data
     user.name = name;
     // Update UI
-    userName.text(name);
+    // userName.text(name);
     // Inform Server
     console.log("<< emitting event: [ registering user ] >> :", user.name );
     socket.emit('registerUser', {
@@ -121,6 +126,8 @@ function registerUser(name) {
     });
     $("#login").hide();
     $("#content").show();
+    console.log(chatBox.offset());
+    chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
   }
 }
 

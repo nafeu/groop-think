@@ -1,0 +1,71 @@
+html, body, #content {
+    height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+p, h1, h2, h3 {
+  margin: 0;
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+input {
+  border: none;
+}
+
+*:focus {
+    outline: none;
+}
+
+#content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#page-left, #page-right {
+  float: left;
+  height: 100%;
+}
+
+#page-left {
+  width: 70%;
+  box-sizing: border-box;
+  border-right: 1px solid black;
+}
+
+#page-right {
+  width: 30%;
+}
+
+#game-area, #chat, #chat-stats, #login {
+  padding: 20px;
+}
+
+#chat {
+  overflow: auto;
+  border-bottom: 1px solid green;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+#chat-box {
+  width: 27%;
+  height: 20px;
+  padding: 20px;
+  font-size: 1em;
+  border-top: 1px solid black;
+  position: absolute;
+  bottom: 0;
+}
+
+#chat-stats {
+  border-bottom: 1px solid black;
+}

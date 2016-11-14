@@ -9,11 +9,21 @@
       <input id="username-box" type="text" placeholder="enter new name">
     </div>
     <div id="content" style="display: none;">
-      <!-- <h4 id="num-rooms"></h4> -->
-      <h4>Online users: <span id="online-users">0</span></h4>
-      <h4>Username: <span id="user-name"></span></h4>
-      <input id="chat-box" type="text" placeholder="enter message">
-      <div id="chat"></div>
+      <div id="page-left">
+        <div id="game-area">
+          <h1>This is the game area!</h1>
+        </div>
+      </div>
+      <div id="page-right">
+        <div id="chat-area">
+          <div id="chat-stats">
+            <p>Online users: <span id="online-users">0</span></p>
+            <!-- <h4>Username: <span id="user-name"></span></h4> -->
+          </div>
+          <div id="chat"></div>
+          <input id="chat-box" type="text" placeholder="enter message">
+        </div>
+      </div>
     </div>
   </body>
   <script src="js/jquery.min.js"></script>
