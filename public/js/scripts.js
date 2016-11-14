@@ -33,7 +33,9 @@ $(window).resize(function () {
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');
-  sendChatMessage(msg);
+  if (msg.trim() !== "") {
+    sendChatMessage(msg);
+  }
 });
 
 usernameBox.enterKey(function(){
