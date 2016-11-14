@@ -1,11 +1,16 @@
 // ---------------------------------------------------------------------------------------
-// Socket Reference Instantiation
+// Variable Instantation
 // ---------------------------------------------------------------------------------------
 var socket = io();
 var clientData = {};
 var user = {
   name: "",
 };
+var COLORS = [
+  '#e21400', '#91580f', '#f8a700', '#f78b00',
+  '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
+  '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+];
 
 // ---------------------------------------------------------------------------------------
 $(function(){ // Document Ready - Start
@@ -17,6 +22,7 @@ var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
+var usernameWarn = $("#username-warn");
 // var userName = $("#user-name");
 
 // Update DOM
@@ -25,6 +31,21 @@ var usernameBox = $("#username-box");
 // Setup UI
 $(window).resize(function () {
   chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
+});
+
+// Default User Actions
+usernameBox.focus();
+
+usernameBox.on('input', function(){
+  console.log("username box changed...");
+  if (usernameBox.val().length > 20) {
+    displayWarning({
+      color: "#CB4335",
+      text: "Sorry, your name is too long"
+    });
+  } else {
+    usernameWarn.html("");
+  }
 });
 
 // ---------------------------------------------------------------------------------------
@@ -40,7 +61,9 @@ chatBox.enterKey(function(){
 
 usernameBox.enterKey(function(){
   var name = usernameBox.val().trim();
-  registerUser(name);
+  if (validateName(name)) {
+    registerUser(name);
+  }
 });
 
 // ---------------------------------------------------------------------------------------
@@ -96,7 +119,7 @@ function handleUpdateOnlineUsers() {
   $.each(clientData, function(key){
     names += clientData[key].name + ", ";
   });
-  onlineUsers.html(names.substr(0, names.length-2));
+  onlineUsers.text(names.substr(0, names.length-2));
   // onlineUsers.html(data);
 }
 
@@ -109,28 +132,15 @@ function printMessage(message) {
 // Event Emitters
 // ---------------------------------------------------------------------------------------
 function registerUser(name) {
-  var action = true;
-  $.each(clientData, function(key){
-    if (clientData[key].name == name) {
-      alert("name is already taken!");
-      action = false;
-    }
+  // Update local data
+  user.name = name;
+  // Inform Server
+  console.log("<< emitting event: [ registering user ] >> :", user.name );
+  socket.emit('registerUser', {
+    name: name
   });
-  if (action) {
-    // Update local data
-    user.name = name;
-    // Update UI
-    // userName.text(name);
-    // Inform Server
-    console.log("<< emitting event: [ registering user ] >> :", user.name );
-    socket.emit('registerUser', {
-      name: name
-    });
-    $("#login").hide();
-    $("#content").show();
-    console.log(chatBox.offset());
-    chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
-  }
+  showContent();
+  updateChatBoxSize();
 }
 
 function sendChatMessage(msg) {
@@ -141,18 +151,52 @@ function sendChatMessage(msg) {
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
-// function createPayload(data) {
-//   return {
-//     id: socket.id,
-//     user: user,
-//     data: data
-//   };
-// }
-
 function cleanInput (input) {
     return $('<div/>').text(input).text();
 }
 
+function displayWarning(warning) {
+  usernameWarn
+    .css("color", warning.color)
+    .text(warning.text);
+}
+
+function validateName(name) {
+  var valid = true;
+  $.each(clientData, function(key){
+    if (clientData[key].name == name) {
+      displayWarning({
+        color: "#D35400",
+        text: "That name is already taken."
+      });
+      valid = false;
+    }
+  });
+  if (name.length > 20) {
+    valid = false;
+  }
+  return valid;
+}
+
+function updateChatBoxSize() {
+  chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
+}
+
+function showContent() {
+  $("#login").fadeOut();
+  $("#content").fadeIn();
+}
+
+function getUsernameColor(username) {
+  // Compute hash code
+  var hash = 7;
+  for (var i = 0; i < username.length; i++) {
+     hash = username.charCodeAt(i) + (hash << 5) - hash;
+  }
+  // Calculate color
+  var index = Math.abs(hash % COLORS.length);
+  return COLORS[index];
+}
 
 // ---------------------------------------------------------------------------------------
 }); // Document Ready - End
