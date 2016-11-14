@@ -28,7 +28,7 @@ userName.text(user.name);
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');
-  sendMessage(msg);
+  sendChatMessage(msg);
 });
 
 usernameBox.enterKey(function(){
@@ -57,8 +57,18 @@ socket.on('updateOnlineUsers',function(){
   handleUpdateOnlineUsers();
 });
 
-socket.on('updateMessages', function(data){
-  printMessage(data);
+socket.on('printText', function(data){
+  var out = "";
+  switch (data.type) {
+    case "chat":
+      out = data.user.name + ": " + data.message;
+      printMessage(cleanInput(out));
+      break;
+    case "update":
+      out = data.text;
+      printMessage(cleanInput(out));
+      break;
+  }
 });
 
 socket.on('persistClientData', function(data){
@@ -83,16 +93,16 @@ function handleUpdateOnlineUsers() {
   // onlineUsers.html(data);
 }
 
-function printMessage(data) {
-  body.append($("<p></p>").text(data.user.name + ": " + data.message));
+function printMessage(message) {
+  body.append($("<p></p>").text(message));
 }
 
 // ---------------------------------------------------------------------------------------
 // Event Emitters
 // ---------------------------------------------------------------------------------------
-function sendMessage(msg) {
+function sendChatMessage(msg) {
   console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
-  socket.emit('sendMessage', { id: socket.id, user: user, message: msg });
+  socket.emit('sendChatMessage', { type: "chat", user: user, message: msg });
 }
 
 function updateUsername(name) {
@@ -124,6 +134,10 @@ function updateUsername(name) {
 //     data: data
 //   };
 // }
+
+function cleanInput (input) {
+    return $('<div/>').text(input).text();
+}
 
 
 // ---------------------------------------------------------------------------------------

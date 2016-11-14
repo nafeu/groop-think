@@ -33,8 +33,8 @@ socket.on('disconnect', function(){
   broadcastUserDisconnect(socket);
 });
 
-socket.on('sendMessage', function(data){
-  broadcastUpdateMessages(data);
+socket.on('sendChatMessage', function(data){
+  broadcastPrintText(data);
 });
 
 socket.on('updateUsername', function(data){
@@ -57,16 +57,18 @@ socket.on('updateUsername', function(data){
 // ---------------------------------------------------------------------------------------
 function broadcastUserConnected(socket) {
   io.sockets.emit('userConnected', socket.id);
+  io.sockets.emit('printText', { type: "update", text: "a user has connected!"});
   io.sockets.emit('updateOnlineUsers');
 }
 
 function broadcastUserDisconnect(socket) {
   io.sockets.emit('userDisconnected', socket.id);
+  io.sockets.emit('printText', { type: "update", text: "a user has disconnected!"});
   io.sockets.emit('updateOnlineUsers');
 }
 
-function broadcastUpdateMessages(data) {
-  io.sockets.emit('updateMessages', data);
+function broadcastPrintText(data) {
+  io.sockets.emit('printText', data);
 }
 
 function broadcastPersistClientData(data) {
