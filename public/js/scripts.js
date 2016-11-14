@@ -13,6 +13,7 @@ $(function(){ // Document Ready - Start
 
 // DOM Reference Instantiation
 var body = $("#content");
+var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
@@ -94,7 +95,7 @@ function handleUpdateOnlineUsers() {
 }
 
 function printMessage(message) {
-  body.append($("<p></p>").text(message));
+  chat.append($("<p></p>").text(message));
 }
 
 // ---------------------------------------------------------------------------------------

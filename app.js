@@ -19,6 +19,7 @@ io.on('connection', function(socket){ // IO Socket Connection Start
 
 // On User Connect, SAVE, PERSIST, NOTIFY
 saveClient(socket);
+socket.emit('persistClientData', serverData.clientData);
 
 // ---------------------------------------------------------------------------------------
 // Event Handlers
@@ -32,7 +33,7 @@ socket.on('registerUser', function(data){
 socket.on('disconnect', function(){
   var user = serverData.clientData[socket.id];
   if (user) broadcastUserDisconnect(user);
-  else broadcastUserDisconnect({ name: "a user"});
+  else broadcastUserDisconnect({ name: "a user" });
   removeClient(socket);
   broadcastPersistClientData(serverData.clientData);
 });
