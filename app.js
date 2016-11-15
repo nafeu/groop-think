@@ -21,53 +21,6 @@ var serverData = {
   clientData: {}
 };
 
-var gameState = {
-  "phase": "start",
-  "currQuestion": {},
-  "numActive": 0,
-  "numAnswers": 0,
-  "winner": null,
-  "players": {
-    // Iterate through client data and fill with
-    // socketid _ username
-    //         |_ score
-    //         |_ choice
-  },
-  next: function(){
-    switch (gameState.phase) {
-      case "start":
-
-        break;
-      case "question":
-
-        break;
-      case "result":
-
-        break;
-      case "end":
-
-        break;
-    }
-  }
-};
-
-var questions = [
-  {
-    "question": "What is the best?",
-    "answers": [
-      "answer a",
-      "answer b"
-    ]
-  },
-  {
-    "question": "What is the worst?",
-    "answers": [
-      "answer c",
-      "answer d"
-    ]
-  }
-];
-
 var uiManager = {
   updateUsers: function() {
     var onlineUsers = [];
@@ -125,16 +78,12 @@ socket.on('disconnect', function(){
     type: "update",
     text: user.name + " has disconnected!"
   });
+  uiManager.updateUsers();
 });
 
 socket.on('printToChat', function(data){
   uiManager.printToChat(data);
 });
-
-// ---------------------------------------------------------------------------------------
-// Event Emitters
-// ---------------------------------------------------------------------------------------
-// ...
 
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
