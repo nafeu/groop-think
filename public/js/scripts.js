@@ -15,20 +15,20 @@ var COLORS = [
 $(function(){ // Document Ready - Start
 // ---------------------------------------------------------------------------------------
 
-// DOM Reference Instantiation
+// DOM References
 var body = $("#content");
+var login = $("#login");
 var gameArea = $("#game-area");
 var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
 var usernameWarn = $("#username-warn");
-var startBtn = $("btn-start-game");
 
 // UI Rendering
 var UI = {
   render: function(data) {
-    switch (data.type) {
+    switch (data.method) {
       case "update-online-users":
         onlineUsers.empty();
         $.each(data.content, function(index, value){
@@ -40,29 +40,64 @@ var UI = {
             .append("<span class='online-user-sep'>, </span>");
         });
       break;
+      case "print-to-chat":
+        if (data.content.type == "update")
+          UI.printToChat(domFactory.build.updateMessage(data.content));
+        if (data.content.type == "chat")
+          UI.printToChat(domFactory.build.chatMessage(data.content));
+      break;
     }
   },
   displayWarning: function(warning) {
     usernameWarn
       .css("color", warning.color)
       .text(warning.message);
+  },
+  printToChat: function(data) {
+    chat.append(data);
+    chat.scrollTop(chat[0].scrollHeight);
+  }
+};
+
+var domFactory = {
+  build: {
+    chatMessage: function(data) {
+      var name = $("<span></span>")
+        .addClass("chat-name")
+        .css("color", getUsernameColor(data.user.name))
+        .text(data.user.name);
+      var message = $("<span></span>")
+        .addClass("chat-message-text")
+        .text(data.message);
+      return $("<p></p>")
+        .addClass("chat-message")
+        .append(name)
+        .append(": ")
+        .append(message);
+    },
+    updateMessage: function(data) {
+      var update = $("<span></span>")
+        .addClass("chat-update-text")
+        .text(data.text);
+      return $("<p></p>")
+        .addClass("chat-update")
+        .append(update);
+    }
   }
 };
 
 // Setup UI
 $(window).resize(function () {
-  chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
+  updateChatBoxSize();
 });
 
 // Default User Actions
 usernameBox.focus();
 
-
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
 // ---------------------------------------------------------------------------------------
 usernameBox.on('input', function(){
-  console.log("username box changed...");
   if (usernameBox.val().length > 20) {
     UI.displayWarning({
       color: "#CB4335",
@@ -74,59 +109,21 @@ usernameBox.on('input', function(){
 });
 
 usernameBox.enterKey(function(){
-  var name = usernameBox.val().trim();
-  registerUser(name);
+  registerUser(usernameBox.val().trim());
 });
 
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');
   if (msg.trim() !== "") {
-    sendChatMessage(msg);
+    socket.emit('printToChat', { type: "chat", user: user, message: msg });
   }
 });
 
 // ---------------------------------------------------------------------------------------
-// Socket Event Handler Dispatcher
+// Socket Event Handlers
 // ---------------------------------------------------------------------------------------
-socket.on('userConnected', function(data){
-  console.log(">> A user connected! << : ", data);
-});
-
-socket.on('userDisconnected', function(data){
-  console.log(">> A user disconnected! << : ", data);
-});
-
-socket.on('initializeUser', function(data){
-  console.log(">> init user << : ", data);
-  user = data;
-  userName.text(user.name);
-});
-
-socket.on('printText', function(data){
-  switch (data.type) {
-    case "chat":
-      printMessage(buildChatMessage(data));
-      break;
-    case "update":
-      printMessage(buildUpdateMessage(data));
-      break;
-  }
-});
-
 socket.on('render', function(data){ UI.render(data); });
-
-// ---------------------------------------------------------------------------------------
-// Socket Event Handlers - Functional
-// ---------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------
-// Socket Event Handlers - UI
-// ---------------------------------------------------------------------------------------
-function printMessage(messageObj) {
-  chat.append(messageObj);
-  chat.scrollTop(chat[0].scrollHeight);
-}
 
 // ---------------------------------------------------------------------------------------
 // Event Emitters
@@ -149,59 +146,16 @@ function registerUser(name) {
   });
 }
 
-function sendChatMessage(msg) {
-  console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
-  socket.emit('sendChatMessage', { type: "chat", user: user, message: msg });
-}
-
-function sendNextGameState() {
-  socket.emit('nextGameState');
-}
-
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
-function cleanInput (input) {
-    return $('<div/>').text(input).text();
-}
-
-function displayWarning(warning) {
-  usernameWarn
-    .css("color", warning.color)
-    .text(warning.text);
-}
-
-function buildChatMessage(data) {
-  var name = $("<span></span>")
-    .addClass("chat-name")
-    .css("color", getUsernameColor(data.user.name))
-    .text(data.user.name);
-  var message = $("<span></span>")
-    .addClass("chat-message-text")
-    .text(data.message);
-  return $("<p></p>")
-    .addClass("chat-message")
-    .append(name)
-    .append(": ")
-    .append(message);
-}
-
-function buildUpdateMessage(data) {
-  var update = $("<span></span>")
-    .addClass("chat-update-text")
-    .text(data.text);
-  return $("<p></p>")
-    .addClass("chat-update")
-    .append(update);
-}
-
 function updateChatBoxSize() {
   chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
 }
 
 function showContent() {
-  $("#login").fadeOut();
-  $("#content").fadeIn();
+  login.fadeOut();
+  body.fadeIn();
 }
 
 function getUsernameColor(username) {
@@ -220,7 +174,6 @@ function getUsernameColor(username) {
 // ---------------------------------------------------------------------------------------
 
 // Sandbox
-
 function apiTest() {
   $.get( "api/users", function( data ) {
     console.log("API CALL [ USERS ] : ", data);

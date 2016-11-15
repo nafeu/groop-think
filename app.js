@@ -76,35 +76,23 @@ var uiManager = {
       onlineUsers.push(serverData.clientData[clients[i]].name);
     }
     io.sockets.emit('render', {
-      type: "update-online-users",
+      method: "update-online-users",
       content: onlineUsers
+    });
+  },
+  printToChat: function(data) {
+    io.sockets.emit('render', {
+      method: "print-to-chat",
+      content: data
     });
   }
 };
 
 // ---------------------------------------------------------------------------------------
-// Event Broadcasts
-// ---------------------------------------------------------------------------------------
-function broadcastUserConnected(user) {
-  io.sockets.emit('userConnected', user.name);
-  io.sockets.emit('printText', { type: "update", text: user.name + " has connected!"});
-  uiManager.updateUsers();
-}
-
-function broadcastUserDisconnect(user) {
-  io.sockets.emit('userDisconnected', user.name);
-  io.sockets.emit('printText', { type: "update", text: user.name + " has disconnected!"});
-  uiManager.updateUsers();
-}
-
-function broadcastPrintText(data) {
-  io.sockets.emit('printText', data);
-}
-// ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
 function saveClient(socket) {
-  console.log("<< new connection client >> : ", socket.id);
+  console.log("<< new connection >> : ", socket.id);
   serverData.sockets[socket.id] = socket;
 }
 
@@ -120,29 +108,27 @@ io.on('connection', function(socket){ // IO Socket Connection Start
 
 // On User Connect, SAVE, PERSIST, NOTIFY
 saveClient(socket);
+
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on('registerUser', function(data){
   serverData.clientData[socket.id] = data;
-  broadcastUserConnected(data);
+  uiManager.printToChat({ type: "update", text: data.name + " has connected!"});
   uiManager.updateUsers();
-  // socket.emit('render', gameState);
 });
 
 socket.on('disconnect', function(){
   var user = serverData.clientData[socket.id];
   removeClient(socket);
-  if (user) broadcastUserDisconnect(user);
-  else broadcastUserDisconnect({ name: "a user" });
+  if (user) uiManager.printToChat({
+    type: "update",
+    text: user.name + " has disconnected!"
+  });
 });
 
-socket.on('sendChatMessage', function(data){
-  broadcastPrintText(data);
-});
-
-socket.on('nextGameState', function(){
-  gameState.next();
+socket.on('printToChat', function(data){
+  uiManager.printToChat(data);
 });
 
 // ---------------------------------------------------------------------------------------
