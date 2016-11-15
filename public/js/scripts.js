@@ -7,9 +7,9 @@ var user = {
   name: "",
 };
 var COLORS = [
-  '#e21400', '#91580f', '#f8a700', '#f78b00',
-  '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-  '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+  '#922B21', '#B03A2E', '#76448A', '#6C3483',
+  '#1F618D', '#2874A6', '#148F77', '#117A65',
+  '#1E8449', '#239B56', '#B7950B', '#AF601A'
 ];
 
 // ---------------------------------------------------------------------------------------
@@ -36,6 +36,10 @@ $(window).resize(function () {
 // Default User Actions
 usernameBox.focus();
 
+
+// ---------------------------------------------------------------------------------------
+// DOM Event Handlers
+// ---------------------------------------------------------------------------------------
 usernameBox.on('input', function(){
   console.log("username box changed...");
   if (usernameBox.val().length > 20) {
@@ -48,21 +52,18 @@ usernameBox.on('input', function(){
   }
 });
 
-// ---------------------------------------------------------------------------------------
-// DOM Event Handlers
-// ---------------------------------------------------------------------------------------
+usernameBox.enterKey(function(){
+  var name = usernameBox.val().trim();
+  if (validateName(name)) {
+    registerUser(name);
+  }
+});
+
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');
   if (msg.trim() !== "") {
     sendChatMessage(msg);
-  }
-});
-
-usernameBox.enterKey(function(){
-  var name = usernameBox.val().trim();
-  if (validateName(name)) {
-    registerUser(name);
   }
 });
 
@@ -88,15 +89,12 @@ socket.on('updateOnlineUsers',function(){
 });
 
 socket.on('printText', function(data){
-  var out = "";
   switch (data.type) {
     case "chat":
-      out = data.user.name + ": " + data.message;
-      printMessage(cleanInput(out));
+      printMessage(buildChatMessage(data));
       break;
     case "update":
-      out = data.text;
-      printMessage(cleanInput(out));
+      printMessage(buildUpdateMessage(data));
       break;
   }
 });
@@ -115,16 +113,22 @@ socket.on('persistClientData', function(data){
 // ---------------------------------------------------------------------------------------
 function handleUpdateOnlineUsers() {
   console.log("!! handling event: [ update online users ] !! :");
+  onlineUsers.empty();
   var names = "";
   $.each(clientData, function(key){
     names += clientData[key].name + ", ";
+    var userLabel = $("<span></span>")
+      .css("color", getUsernameColor(clientData[key].name))
+      .text(clientData[key].name);
+    onlineUsers
+      .append(userLabel)
+      .append("<span class='online-user-sep'>, </span>");
   });
-  onlineUsers.text(names.substr(0, names.length-2));
-  // onlineUsers.html(data);
+
 }
 
-function printMessage(message) {
-  chat.append($("<p></p>").text(message));
+function printMessage(messageObj) {
+  chat.append(messageObj);
   chat.scrollTop(chat[0].scrollHeight);
 }
 
@@ -176,6 +180,30 @@ function validateName(name) {
     valid = false;
   }
   return valid;
+}
+
+function buildChatMessage(data) {
+  var name = $("<span></span>")
+    .addClass("chat-name")
+    .css("color", getUsernameColor(data.user.name))
+    .text(data.user.name);
+  var message = $("<span></span>")
+    .addClass("chat-message-text")
+    .text(data.message);
+  return $("<p></p>")
+    .addClass("chat-message")
+    .append(name)
+    .append(": ")
+    .append(message);
+}
+
+function buildUpdateMessage(data) {
+  var update = $("<span></span>")
+    .addClass("chat-update-text")
+    .text(data.text);
+  return $("<p></p>")
+    .addClass("chat-update")
+    .append(update);
 }
 
 function updateChatBoxSize() {
