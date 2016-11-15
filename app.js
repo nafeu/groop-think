@@ -34,10 +34,10 @@ socket.on('registerUser', function(data){
 
 socket.on('disconnect', function(){
   var user = serverData.clientData[socket.id];
-  if (user) broadcastUserDisconnect(user);
-  else broadcastUserDisconnect({ name: "a user" });
   removeClient(socket);
   broadcastPersistClientData(serverData.clientData);
+  if (user) broadcastUserDisconnect(user);
+  else broadcastUserDisconnect({ name: "a user" });
 });
 
 socket.on('sendChatMessage', function(data){
