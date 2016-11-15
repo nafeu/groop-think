@@ -2,7 +2,6 @@
 // Variable Instantation
 // ---------------------------------------------------------------------------------------
 var socket = io();
-var clientData = {};
 var user = {
   name: "",
 };
@@ -25,10 +24,30 @@ var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
 var usernameWarn = $("#username-warn");
 var startBtn = $("btn-start-game");
-// var userName = $("#user-name");
 
-// Update DOM
-// userName.text(user.name);
+// UI Rendering
+var UI = {
+  render: function(data) {
+    switch (data.type) {
+      case "update-online-users":
+        onlineUsers.empty();
+        $.each(data.content, function(index, value){
+          var userLabel = $("<span></span>")
+            .css("color", getUsernameColor(value))
+            .text(value);
+          onlineUsers
+            .append(userLabel)
+            .append("<span class='online-user-sep'>, </span>");
+        });
+      break;
+    }
+  },
+  displayWarning: function(warning) {
+    usernameWarn
+      .css("color", warning.color)
+      .text(warning.message);
+  }
+};
 
 // Setup UI
 $(window).resize(function () {
@@ -45,9 +64,9 @@ usernameBox.focus();
 usernameBox.on('input', function(){
   console.log("username box changed...");
   if (usernameBox.val().length > 20) {
-    displayWarning({
+    UI.displayWarning({
       color: "#CB4335",
-      text: "Sorry, your name is too long"
+      message: "Sorry, your name is too long"
     });
   } else {
     usernameWarn.html("");
@@ -56,9 +75,7 @@ usernameBox.on('input', function(){
 
 usernameBox.enterKey(function(){
   var name = usernameBox.val().trim();
-  if (validateName(name)) {
-    registerUser(name);
-  }
+  registerUser(name);
 });
 
 chatBox.enterKey(function(){
@@ -86,10 +103,6 @@ socket.on('initializeUser', function(data){
   userName.text(user.name);
 });
 
-socket.on('updateOnlineUsers',function(){
-  handleUpdateOnlineUsers();
-});
-
 socket.on('printText', function(data){
   switch (data.type) {
     case "chat":
@@ -101,14 +114,7 @@ socket.on('printText', function(data){
   }
 });
 
-socket.on('persistClientData', function(data){
-  clientData = data;
-  console.log(">> persisting client data << : ", clientData);
-});
-
-socket.on('render', function(gameState){
-  render(gameState);
-});
+socket.on('render', function(data){ UI.render(data); });
 
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - Functional
@@ -117,22 +123,6 @@ socket.on('render', function(gameState){
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - UI
 // ---------------------------------------------------------------------------------------
-function handleUpdateOnlineUsers() {
-  console.log("!! handling event: [ update online users ] !! :");
-  onlineUsers.empty();
-  var names = "";
-  $.each(clientData, function(key){
-    names += clientData[key].name + ", ";
-    var userLabel = $("<span></span>")
-      .css("color", getUsernameColor(clientData[key].name))
-      .text(clientData[key].name);
-    onlineUsers
-      .append(userLabel)
-      .append("<span class='online-user-sep'>, </span>");
-  });
-
-}
-
 function printMessage(messageObj) {
   chat.append(messageObj);
   chat.scrollTop(chat[0].scrollHeight);
@@ -142,15 +132,21 @@ function printMessage(messageObj) {
 // Event Emitters
 // ---------------------------------------------------------------------------------------
 function registerUser(name) {
-  // Update local data
-  user.name = name;
-  // Inform Server
-  console.log("<< emitting event: [ registering user ] >> :", user.name );
-  socket.emit('registerUser', {
-    name: name
+  $.post('/api/users/validate', { name: name }).done(function(data){
+    if (data.valid) {
+      user.name = name;
+      socket.emit('registerUser', {
+        name: name
+      });
+      showContent();
+      updateChatBoxSize();
+    } else {
+      UI.displayWarning({
+        color: data.color,
+        message: data.message
+      });
+    }
   });
-  showContent();
-  updateChatBoxSize();
 }
 
 function sendChatMessage(msg) {
@@ -173,23 +169,6 @@ function displayWarning(warning) {
   usernameWarn
     .css("color", warning.color)
     .text(warning.text);
-}
-
-function validateName(name) {
-  var valid = true;
-  $.each(clientData, function(key){
-    if (clientData[key].name == name) {
-      displayWarning({
-        color: "#D35400",
-        text: "That name is already taken."
-      });
-      valid = false;
-    }
-  });
-  if (name.length > 20) {
-    valid = false;
-  }
-  return valid;
 }
 
 function buildChatMessage(data) {
@@ -236,37 +215,14 @@ function getUsernameColor(username) {
   return COLORS[index];
 }
 
-function render(gameState) {
-
-  // What does your render object require?
-  // gameState.phase
-  // Phase: START
-  gameArea.empty();
-  switch (gameState.phase) {
-    case "start":
-      gameArea.append(buildPhaseStartDOM({
-        title: "This is the start of something new."
-      }));
-      break;
-  }
-
-
-}
-
-function buildPhaseStartDOM(content) {
-  var out = $("<p></p>")
-    .text(content.title);
-  return out;
-}
-
-// ---------------------------------------------------------------------------------------
-// Game Logic
-// ---------------------------------------------------------------------------------------
-
 // ---------------------------------------------------------------------------------------
 }); // Document Ready - End
 // ---------------------------------------------------------------------------------------
 
-function sendNextGameState() {
-  socket.emit('nextGameState');
+// Sandbox
+
+function apiTest() {
+  $.get( "api/users", function( data ) {
+    console.log("API CALL [ USERS ] : ", data);
+  });
 }

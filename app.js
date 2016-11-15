@@ -1,9 +1,15 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+var bodyParser = require('body-parser');
 var io = require('socket.io')(http);
 io.set('heartbeat timeout', 4000);
 io.set('heartbeat interval', 2000);
+
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
 
 // ---------------------------------------------------------------------------------------
 // Routing
@@ -27,6 +33,22 @@ var gameState = {
     //         |_ score
     //         |_ choice
   },
+  next: function(){
+    switch (gameState.phase) {
+      case "start":
+
+        break;
+      case "question":
+
+        break;
+      case "result":
+
+        break;
+      case "end":
+
+        break;
+    }
+  }
 };
 
 var questions = [
@@ -46,28 +68,17 @@ var questions = [
   }
 ];
 
-var gameState = {
-  next: function(){
-    switch (gameState.phase) {
-      case "start":
-
-        break;
-      case "question":
-
-        break;
-      case "result":
-
-        break;
-      case "end":
-
-        break;
+var uiManager = {
+  updateUsers: function() {
+    var onlineUsers = [];
+    var clients = Object.keys(serverData.clientData);
+    for (var i = 0; i < clients.length; i++) {
+      onlineUsers.push(serverData.clientData[clients[i]].name);
     }
-  },
-  get: function(){
-    switch (gameState.phase) {
-      default:
-        break;
-    }
+    io.sockets.emit('render', {
+      type: "update-online-users",
+      content: onlineUsers
+    });
   }
 };
 
@@ -77,27 +88,18 @@ var gameState = {
 function broadcastUserConnected(user) {
   io.sockets.emit('userConnected', user.name);
   io.sockets.emit('printText', { type: "update", text: user.name + " has connected!"});
-  io.sockets.emit('updateOnlineUsers');
+  uiManager.updateUsers();
 }
 
 function broadcastUserDisconnect(user) {
   io.sockets.emit('userDisconnected', user.name);
   io.sockets.emit('printText', { type: "update", text: user.name + " has disconnected!"});
-  io.sockets.emit('updateOnlineUsers');
+  uiManager.updateUsers();
 }
 
 function broadcastPrintText(data) {
   io.sockets.emit('printText', data);
 }
-
-function broadcastPersistClientData(data) {
-  io.sockets.emit('persistClientData', data);
-}
-
-function broadcastRender(data) {
-  io.sockets.emit('render', data);
-}
-
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
@@ -118,22 +120,19 @@ io.on('connection', function(socket){ // IO Socket Connection Start
 
 // On User Connect, SAVE, PERSIST, NOTIFY
 saveClient(socket);
-socket.emit('persistClientData', serverData.clientData);
-
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on('registerUser', function(data){
   serverData.clientData[socket.id] = data;
-  broadcastPersistClientData(serverData.clientData);
   broadcastUserConnected(data);
-  socket.emit('render', gameState);
+  uiManager.updateUsers();
+  // socket.emit('render', gameState);
 });
 
 socket.on('disconnect', function(){
   var user = serverData.clientData[socket.id];
   removeClient(socket);
-  broadcastPersistClientData(serverData.clientData);
   if (user) broadcastUserDisconnect(user);
   else broadcastUserDisconnect({ name: "a user" });
 });
@@ -165,7 +164,39 @@ http.listen(3000, function(){
 });
 
 // ---------------------------------------------------------------------------------------
-// Game Logic
+// Data API
 // ---------------------------------------------------------------------------------------
 
+app.get('/api/users', function(req, res) {
+  res.json(serverData.clientData);
+});
+
+app.post('/api/users/validate', function(req, res){
+
+  var name = req.body.name;
+  valid = true;
+  message = "";
+  color = "";
+
+  var clients = Object.keys(serverData.clientData);
+  for (var i = 0; i < clients.length; i++) {
+    if (serverData.clientData[clients[i]].name == name)
+      valid = false;
+      message = "That name is already taken";
+      color = "green";
+  }
+
+  if (req.body.name.length > 20) {
+    valid = false;
+    message = "Sorry, your name is too long";
+    color = "#CB4335";
+  }
+
+  res.json({
+    valid: valid,
+    message: message,
+    color: color
+  });
+
+});
 
