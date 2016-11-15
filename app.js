@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+io.set('heartbeat timeout', 4000);
+io.set('heartbeat interval', 2000);
 
 // ---------------------------------------------------------------------------------------
 // Routing
@@ -87,9 +89,11 @@ function removeClient(socket) {
   delete serverData.sockets[socket.id];
   delete serverData.clientData[socket.id];
 }
+
 // ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------
 http.listen(3000, function(){
   console.log('listening on localhost:3000');
 });
+
