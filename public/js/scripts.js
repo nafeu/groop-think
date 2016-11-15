@@ -18,11 +18,13 @@ $(function(){ // Document Ready - Start
 
 // DOM Reference Instantiation
 var body = $("#content");
+var gameArea = $("#game-area");
 var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
 var usernameWarn = $("#username-warn");
+var startBtn = $("btn-start-game");
 // var userName = $("#user-name");
 
 // Update DOM
@@ -104,6 +106,10 @@ socket.on('persistClientData', function(data){
   console.log(">> persisting client data << : ", clientData);
 });
 
+socket.on('render', function(gameState){
+  render(gameState);
+});
+
 // ---------------------------------------------------------------------------------------
 // Socket Event Handlers - Functional
 // ---------------------------------------------------------------------------------------
@@ -150,6 +156,10 @@ function registerUser(name) {
 function sendChatMessage(msg) {
   console.log("<< emitting event: [ send message ] >> :", socket.id, user, msg);
   socket.emit('sendChatMessage', { type: "chat", user: user, message: msg });
+}
+
+function sendNextGameState() {
+  socket.emit('nextGameState');
 }
 
 // ---------------------------------------------------------------------------------------
@@ -226,6 +236,37 @@ function getUsernameColor(username) {
   return COLORS[index];
 }
 
+function render(gameState) {
+
+  // What does your render object require?
+  // gameState.phase
+  // Phase: START
+  gameArea.empty();
+  switch (gameState.phase) {
+    case "start":
+      gameArea.append(buildPhaseStartDOM({
+        title: "This is the start of something new."
+      }));
+      break;
+  }
+
+
+}
+
+function buildPhaseStartDOM(content) {
+  var out = $("<p></p>")
+    .text(content.title);
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------
+// Game Logic
+// ---------------------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------------------------
 }); // Document Ready - End
 // ---------------------------------------------------------------------------------------
+
+function sendNextGameState() {
+  socket.emit('nextGameState');
+}

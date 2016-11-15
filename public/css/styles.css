@@ -108,3 +108,7 @@ input {
 .online-user-sep:last-child {
   display: none;
 }
+
+#game-area {
+  padding: 20%;
+}

@@ -15,43 +15,61 @@ var serverData = {
   clientData: {}
 };
 
-// ---------------------------------------------------------------------------------------
-io.on('connection', function(socket){ // IO Socket Connection Start
-// ---------------------------------------------------------------------------------------
+var gameState = {
+  "phase": "start",
+  "currQuestion": {},
+  "numActive": 0,
+  "numAnswers": 0,
+  "winner": null,
+  "players": {
+    // Iterate through client data and fill with
+    // socketid _ username
+    //         |_ score
+    //         |_ choice
+  },
+};
 
-// On User Connect, SAVE, PERSIST, NOTIFY
-saveClient(socket);
-socket.emit('persistClientData', serverData.clientData);
+var questions = [
+  {
+    "question": "What is the best?",
+    "answers": [
+      "answer a",
+      "answer b"
+    ]
+  },
+  {
+    "question": "What is the worst?",
+    "answers": [
+      "answer c",
+      "answer d"
+    ]
+  }
+];
 
-// ---------------------------------------------------------------------------------------
-// Event Handlers
-// ---------------------------------------------------------------------------------------
-socket.on('registerUser', function(data){
-  serverData.clientData[socket.id] = data;
-  broadcastPersistClientData(serverData.clientData);
-  broadcastUserConnected(data);
-});
+var gameState = {
+  next: function(){
+    switch (gameState.phase) {
+      case "start":
 
-socket.on('disconnect', function(){
-  var user = serverData.clientData[socket.id];
-  removeClient(socket);
-  broadcastPersistClientData(serverData.clientData);
-  if (user) broadcastUserDisconnect(user);
-  else broadcastUserDisconnect({ name: "a user" });
-});
+        break;
+      case "question":
 
-socket.on('sendChatMessage', function(data){
-  broadcastPrintText(data);
-});
+        break;
+      case "result":
 
-// ---------------------------------------------------------------------------------------
-// Event Emitters
-// ---------------------------------------------------------------------------------------
-// ...
+        break;
+      case "end":
 
-// ---------------------------------------------------------------------------------------
-}); // IO Socket Connection End
-// ---------------------------------------------------------------------------------------
+        break;
+    }
+  },
+  get: function(){
+    switch (gameState.phase) {
+      default:
+        break;
+    }
+  }
+};
 
 // ---------------------------------------------------------------------------------------
 // Event Broadcasts
@@ -76,6 +94,10 @@ function broadcastPersistClientData(data) {
   io.sockets.emit('persistClientData', data);
 }
 
+function broadcastRender(data) {
+  io.sockets.emit('render', data);
+}
+
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
@@ -91,9 +113,59 @@ function removeClient(socket) {
 }
 
 // ---------------------------------------------------------------------------------------
+io.on('connection', function(socket){ // IO Socket Connection Start
+// ---------------------------------------------------------------------------------------
+
+// On User Connect, SAVE, PERSIST, NOTIFY
+saveClient(socket);
+socket.emit('persistClientData', serverData.clientData);
+
+// ---------------------------------------------------------------------------------------
+// Event Handlers
+// ---------------------------------------------------------------------------------------
+socket.on('registerUser', function(data){
+  serverData.clientData[socket.id] = data;
+  broadcastPersistClientData(serverData.clientData);
+  broadcastUserConnected(data);
+  socket.emit('render', gameState);
+});
+
+socket.on('disconnect', function(){
+  var user = serverData.clientData[socket.id];
+  removeClient(socket);
+  broadcastPersistClientData(serverData.clientData);
+  if (user) broadcastUserDisconnect(user);
+  else broadcastUserDisconnect({ name: "a user" });
+});
+
+socket.on('sendChatMessage', function(data){
+  broadcastPrintText(data);
+});
+
+socket.on('nextGameState', function(){
+  gameState.next();
+});
+
+// ---------------------------------------------------------------------------------------
+// Event Emitters
+// ---------------------------------------------------------------------------------------
+// ...
+
+// ---------------------------------------------------------------------------------------
+}); // IO Socket Connection End
+// ---------------------------------------------------------------------------------------
+
+
+
+// ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------
 http.listen(3000, function(){
   console.log('listening on localhost:3000');
 });
+
+// ---------------------------------------------------------------------------------------
+// Game Logic
+// ---------------------------------------------------------------------------------------
+
 
