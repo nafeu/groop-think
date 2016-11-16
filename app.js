@@ -21,6 +21,68 @@ var serverData = {
   clientData: {}
 };
 
+var gameState = {
+  "phase": "start",
+  "questionIdx": 0,
+  "currQuestion": {},
+  "numActive": 0,
+  "numAnswers": 0,
+  "winner": null,
+  "players": {
+    // Iterate through client data and fill with
+    // socketid _ username
+    //         |_ score
+    //         |_ choice
+  },
+  next: function(){
+    switch (gameState.phase) {
+      case "start":
+        var clientIds = Object.keys(serverData.clientData);
+        gameState.numActive = clientIds;
+        for (var i = 0; i < clientIds.length; i++) {
+          var playerObj = {
+            name: serverData.clientData[clientIds[i]].name,
+            score: 0,
+            choice: 0
+          };
+          gameState.players[clientIds[i]] = playerObj;
+        }
+        console.log("players : ", gameState.players);
+        gameState.currQuestion = questions[gameState.questionIdx];
+        gameState.questionIdx++;
+        gameState.phase = "question";
+        break;
+      case "question":
+        gameState.phase = "result";
+        break;
+      case "result":
+        gameState.phase = "end";
+        break;
+      case "end":
+        gameState.phase = "start";
+        break;
+    }
+    uiManager.renderState();
+  }
+};
+
+var questions = [
+  {
+    "q": "What is the best?",
+    "a": [
+      "answer a",
+      "answer b"
+    ]
+  },
+  {
+    "q": "What is the worst?",
+    "a": [
+      "answer c",
+      "answer d"
+    ]
+  }
+];
+
 var uiManager = {
   updateUsers: function() {
     var onlineUsers = [];
@@ -37,6 +99,12 @@ var uiManager = {
     io.sockets.emit('render', {
       method: "print-to-chat",
       content: data
+    });
+  },
+  renderState: function() {
+    io.sockets.emit('render', {
+      method: "game-state",
+      content: gameState
     });
   }
 };
@@ -67,6 +135,10 @@ saveClient(socket);
 // ---------------------------------------------------------------------------------------
 socket.on('registerUser', function(data){
   serverData.clientData[socket.id] = data;
+  socket.emit('render', {
+    method: "game-state",
+    content: gameState
+  });
   uiManager.printToChat({ type: "update", text: data.name + " has connected!"});
   uiManager.updateUsers();
 });
@@ -84,6 +156,26 @@ socket.on('disconnect', function(){
 socket.on('printToChat', function(data){
   uiManager.printToChat(data);
 });
+
+socket.on('nextState', function(){
+  gameState.next();
+});
+
+socket.on('submitAnswer', function(data){
+  console.log("Submitted answer: ", serverData.clientData[socket.id].name, data);
+  if (gameState.players[socket.id]) {
+    gameState.players[socket.id].choice = data.answer;
+    gameState.numAnswers++;
+    io.sockets.emit('render', {
+      method: "add-class",
+      content: {
+        "id": "#userId-"+gameState.players[socket.id].name,
+        "class": "submittedAnswer"
+      }
+    });
+  }
+});
+
 
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End

@@ -112,3 +112,7 @@ input {
 #game-area {
   padding: 20%;
 }
+
+.submittedAnswer {
+  font-size: 3em;
+}
