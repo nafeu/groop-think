@@ -116,3 +116,7 @@ input {
 .submittedAnswer {
   font-size: 3em;
 }
+
+.red {
+  color: red;
+}

@@ -65,6 +65,16 @@ var UI = {
         if (gameState.phase == "question") {
           gameArea.empty();
           gameArea.append(domFactory.build.questionDisplay(gameState));
+          $.each(gameState.players, function(key){
+            if (gameState.players[key].choice !== null) {
+              $("#userId-"+gameState.players[key].name).addClass("submittedAnswer");
+            }
+          });
+        }
+        if (gameState.phase == "result") {
+          console.log("calling result block... : ", user.name);
+          gameArea.empty();
+          gameArea.append(domFactory.build.resultDisplay(gameState));
         }
         break;
     }
@@ -139,6 +149,9 @@ var domFactory = {
         .append(answers)
         .append(players);
 
+    },
+    resultDisplay: function(data) {
+      return $("<h1></h1>").text("The most popular answer was '" + data.topAnswer + "'");
     }
   }
 };

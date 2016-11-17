@@ -27,6 +27,7 @@ var gameState = {
   "currQuestion": {},
   "numActive": 0,
   "numAnswers": 0,
+  "topAnswer": null,
   "winner": null,
   "players": {
     // Iterate through client data and fill with
@@ -38,12 +39,12 @@ var gameState = {
     switch (gameState.phase) {
       case "start":
         var clientIds = Object.keys(serverData.clientData);
-        gameState.numActive = clientIds;
+        gameState.numActive = clientIds.length;
         for (var i = 0; i < clientIds.length; i++) {
           var playerObj = {
             name: serverData.clientData[clientIds[i]].name,
             score: 0,
-            choice: 0
+            choice: null
           };
           gameState.players[clientIds[i]] = playerObj;
         }
@@ -53,6 +54,20 @@ var gameState = {
         gameState.phase = "question";
         break;
       case "question":
+        var activePlayers = Object.keys(gameState.players);
+        var resultCounter = [];
+        for (var j = 0; j < gameState.currQuestion.a.length; j++) {
+          resultCounter.push(0);
+        }
+        console.log("RES COUNT : ", resultCounter);
+        for (var k = 0; k < activePlayers.length; k++) {
+          console.log("Client Id k :", gameState.players[activePlayers[k]]);
+          resultCounter[gameState.players[activePlayers[k]].choice] += 1;
+        }
+        console.log("RES COUNT FILLED: ", resultCounter);
+        gameState.topAnswer = gameState.currQuestion.a[indexOfMax(resultCounter)];
+        console.log("CURR QUESTION", gameState.currQuestion.a);
+        console.log("TOP ANS", gameState.topAnswer);
         gameState.phase = "result";
         break;
       case "result":
@@ -123,6 +138,21 @@ function removeClient(socket) {
   delete serverData.clientData[socket.id];
 }
 
+function indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+    var max = arr[0];
+    var maxIndex = 0;
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+    return maxIndex;
+}
+
 // ---------------------------------------------------------------------------------------
 io.on('connection', function(socket){ // IO Socket Connection Start
 // ---------------------------------------------------------------------------------------
@@ -163,7 +193,7 @@ socket.on('nextState', function(){
 
 socket.on('submitAnswer', function(data){
   console.log("Submitted answer: ", serverData.clientData[socket.id].name, data);
-  if (gameState.players[socket.id]) {
+  if (gameState.players[socket.id] && (gameState.players[socket.id].choice === null)) {
     gameState.players[socket.id].choice = data.answer;
     gameState.numAnswers++;
     io.sockets.emit('render', {
@@ -173,6 +203,9 @@ socket.on('submitAnswer', function(data){
         "class": "submittedAnswer"
       }
     });
+  }
+  if (gameState.numAnswers == gameState.numActive) {
+    gameState.next();
   }
 });
 
