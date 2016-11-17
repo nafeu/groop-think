@@ -54,13 +54,7 @@ var UI = {
         var gameState = data.content;
         if (gameState.phase == "start") {
           gameArea.empty();
-          gameArea.append(
-            $("<h1></h1>")
-              .text("Click here to start game!")
-              .click(function(){
-                socket.emit("nextState");
-              })
-          );
+          gameArea.append(domFactory.build.startingDisplay(gameState));
         }
         if (gameState.phase == "question") {
           gameArea.empty();
@@ -75,6 +69,10 @@ var UI = {
           console.log("calling result block... : ", user.name);
           gameArea.empty();
           gameArea.append(domFactory.build.resultDisplay(gameState));
+        }
+        if (gameState.phase == "end") {
+          gameArea.empty();
+          gameArea.append(domFactory.build.endingDisplay(gameState));
         }
         break;
     }
@@ -114,44 +112,99 @@ var domFactory = {
         .addClass("chat-update")
         .append(update);
     },
+    startingDisplay: function(data) {
+      return domFactory.assets.gameBoard()
+        .append(domFactory.assets.nextBtn("Click to start game!"));
+    },
     questionDisplay: function(data) {
-      var out = $("<div></div>").attr("id", "game-board");
-      var question = $("<div></div>").attr("id", "display-question");
-      var answers = $("<div></div>").attr("id", "display-answers");
-      var players = $("<div></div>").attr("id", "display-players");
-
-      // Question segment
-      question.text(data.currQuestion.q);
-
-      // Answer segment
+      return domFactory.assets.gameBoard()
+        .append(domFactory.assets.question(data))
+        .append(domFactory.assets.answers(data))
+        .append(domFactory.assets.players(data));
+    },
+    resultDisplay: function(data) {
+      return domFactory.assets.gameBoard()
+        .append(domFactory.assets.topAnswer(data))
+        .append(domFactory.assets.scores(data))
+        .append(domFactory.assets.nextBtn("continue..."));
+    },
+    endingDisplay: function(data) {
+      return domFactory.assets.gameBoard()
+        .append(domFactory.assets.winner(data))
+        .append(domFactory.assets.nextBtn("Play again!"));
+    }
+  },
+  assets: {
+    gameBoard: function() {
+      return $("<div></div>").attr("id", "game-board");
+    },
+    question: function(data) {
+      return $("<div></div>").attr("id", "display-question").text(data.currQuestion.q);
+    },
+    answers: function(data) {
+      var out = $("<div></div>").attr("id", "display-answers");
       var choices = data.currQuestion.a;
       for (var i = 0; i < choices.length; i++) {
         var choice = $("<div></div>")
           .addClass("display-choice")
           .text(choices[i])
           .attr("onclick", "socket.emit('submitAnswer', { 'answer' : " + i + "})");
-        answers.append(choice);
+        out.append(choice);
       }
-
-      // Player segment
+      return out;
+    },
+    players: function(data) {
+      var out = $("<div></div>").attr("id", "display-players");
       var playerIds = Object.keys(data.players);
-      for (var j = 0; j < playerIds.length; j++) {
+      for (var i = 0; i < playerIds.length; i++) {
         var player = $("<div></div>")
           .addClass("display-player")
-          .attr("id", "userId-"+data.players[playerIds[j]].name)
-          .text(data.players[playerIds[j]].name)
-          .css("color", getUsernameColor(data.players[playerIds[j]].name));
-        players.append(player);
+          .attr("id", "userId-"+data.players[playerIds[i]].name)
+          .text(data.players[playerIds[i]].name)
+          .css("color", getUsernameColor(data.players[playerIds[i]].name));
+        out.append(player);
       }
-
-      return out
-        .append(question)
-        .append(answers)
-        .append(players);
-
+      return out;
     },
-    resultDisplay: function(data) {
+    scores: function(data) {
+      var out = $("<div></div>").attr("id", "display-scores");
+      var playerIds = Object.keys(data.players);
+      for (var i = 0; i < playerIds.length; i++) {
+        var player = $("<div></div>")
+          .addClass("display-player")
+          .attr("id", "userId-"+data.players[playerIds[i]].name)
+          .text(data.players[playerIds[i]].name + "-- score: " +
+            data.players[playerIds[i]].score + " (" +
+            data.players[playerIds[i]].increment + ")")
+          .css("color", getUsernameColor(data.players[playerIds[i]].name));
+        out.append(player);
+      }
+      return out;
+    },
+    topAnswer: function(data) {
       return $("<h1></h1>").text("The most popular answer was '" + data.topAnswer + "'");
+    },
+    winner: function(data) {
+      var out = $("<div></div>").attr("id", "display-winner");
+      var playerIds = Object.keys(data.players);
+      var winner = "";
+      var highestScore = 0;
+      for (var i = 0; i < playerIds.length; i++) {
+        if (data.players[playerIds[i]].score > highestScore) {
+          highestScore = data.players[playerIds[i]].score;
+          winner = data.players[playerIds[i]].name;
+        }
+      }
+      out.text("The winner is " + winner + " with a score of " + highestScore);
+      if (highestScore === 0) {
+        out.text("Ugh, it was a tie... Lame.");
+      }
+      return out;
+    },
+    nextBtn: function(msg) {
+      return $("<h1></h1>").text(msg).click(function(){
+        socket.emit("nextState");
+      });
     }
   }
 };

@@ -36,44 +36,71 @@ var gameState = {
     //         |_ choice
   },
   next: function(){
+    var activePlayers = Object.keys(gameState.players);
     switch (gameState.phase) {
       case "start":
+        console.log("CURRENT PHASE", gameState.phase);
         var clientIds = Object.keys(serverData.clientData);
         gameState.numActive = clientIds.length;
         for (var i = 0; i < clientIds.length; i++) {
           var playerObj = {
             name: serverData.clientData[clientIds[i]].name,
             score: 0,
-            choice: null
+            choice: null,
+            increment: null
           };
           gameState.players[clientIds[i]] = playerObj;
         }
-        console.log("players : ", gameState.players);
         gameState.currQuestion = questions[gameState.questionIdx];
         gameState.questionIdx++;
+        console.log("SWITCHING PHASE TO QUESTION");
         gameState.phase = "question";
         break;
       case "question":
-        var activePlayers = Object.keys(gameState.players);
+        console.log("CURRENT PHASE", gameState.phase);
         var resultCounter = [];
         for (var j = 0; j < gameState.currQuestion.a.length; j++) {
           resultCounter.push(0);
         }
-        console.log("RES COUNT : ", resultCounter);
         for (var k = 0; k < activePlayers.length; k++) {
-          console.log("Client Id k :", gameState.players[activePlayers[k]]);
           resultCounter[gameState.players[activePlayers[k]].choice] += 1;
         }
-        console.log("RES COUNT FILLED: ", resultCounter);
         gameState.topAnswer = gameState.currQuestion.a[indexOfMax(resultCounter)];
-        console.log("CURR QUESTION", gameState.currQuestion.a);
-        console.log("TOP ANS", gameState.topAnswer);
+        for (var l = 0; l < activePlayers.length; l++) {
+          if (gameState.players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
+            gameState.players[activePlayers[l]].score += 1;
+            gameState.players[activePlayers[l]].increment = "+1";
+          } else {
+            gameState.players[activePlayers[l]].increment = "-";
+          }
+        }
+        console.log("SWITCHING PHASE TO RESULT");
         gameState.phase = "result";
         break;
       case "result":
-        gameState.phase = "end";
+        console.log("CURRENT PHASE", gameState.phase);
+        if (gameState.questionIdx < questions.length) {
+          gameState.currQuestion = questions[gameState.questionIdx];
+          gameState.questionIdx++;
+          for (var m = 0; m < activePlayers.length; m++) {
+            gameState.players[activePlayers[m]].choice = null;
+          }
+          gameState.numAnswers = 0;
+          console.log("SWITCHING PHASE TO QUESTION");
+          gameState.phase = "question";
+        } else {
+          console.log("SWITCHING PHASE TO END");
+          gameState.phase = "end";
+        }
         break;
       case "end":
+        gameState.questionIdx = 0;
+        gameState.currQuestion = {};
+        gameState.numActive = 0;
+        gameState.numAnswers = 0;
+        gameState.topAnswer = null;
+        gameState.winner = null;
+        gameState.players = {};
         gameState.phase = "start";
         break;
     }
@@ -83,17 +110,27 @@ var gameState = {
 
 var questions = [
   {
-    "q": "What is the best?",
+    "q": "What is the best fruit?",
     "a": [
-      "answer a",
-      "answer b"
+      "apple",
+      "orange",
+      "pineapple"
     ]
   },
   {
-    "q": "What is the worst?",
+    "q": "What is the worst fruit?",
     "a": [
-      "answer c",
-      "answer d"
+      "durian",
+      "kiwi",
+      "coconut"
+    ]
+  },
+  {
+    "q": "What is the best worst fruit?",
+    "a": [
+      "applepen",
+      "pineapplepen",
+      "penpinappleapplepen"
     ]
   }
 ];
@@ -193,6 +230,7 @@ socket.on('nextState', function(){
 
 socket.on('submitAnswer', function(data){
   console.log("Submitted answer: ", serverData.clientData[socket.id].name, data);
+  console.log("For " + gameState.players[socket.id].name + " the choice value is " + gameState.players[socket.id].choice);
   if (gameState.players[socket.id] && (gameState.players[socket.id].choice === null)) {
     gameState.players[socket.id].choice = data.answer;
     gameState.numAnswers++;
