@@ -4,7 +4,13 @@
   <link rel="stylesheet" type="text/css" href="css/styles.css">
   <script src="/socket.io/socket.io.js"></script>
   <body>
-    <div id="login">
+    <div id="room">
+      <h1>Start or join a game.</h1>
+      <div id="room-create-btn" type="text">Create Game</div>
+      <input id="room-box" type="text" placeholder="enter room id">
+      <h2 id="room-warn"></h2>
+    </div>
+    <div id="login" style="display: none;">
       <h1>Please pick a username.</h1>
       <input id="username-box" type="text" placeholder="enter a new name">
       <h2 id="username-warn"></h2>
@@ -18,7 +24,6 @@
         <div id="chat-area">
           <div id="chat-stats">
             <p><span class="label">Online users:</span> <span id="online-users"></span></p>
-            <!-- <h4>Username: <span id="user-name"></span></h4> -->
           </div>
           <div id="chat"></div>
           <input id="chat-box" type="text" placeholder="enter message">

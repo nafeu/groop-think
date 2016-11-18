@@ -69,21 +69,21 @@ input {
   border-bottom: 1px solid #D5D8DC;
 }
 
-#username-box {
+#username-box, #room-box {
   font-size: 2em;
 }
 
-#login {
+#login, #room {
   padding-left: 15%;
   padding-top: 10%;
 }
 
-#login h1 {
+#login h1, #room h1 {
   font-size: 3em;
   margin-bottom: 5px;
 }
 
-#login h2 {
+#login h2, #room h2 {
   margin-top: 5px;
   font-weight: normal;
   font-size: 1.5em;

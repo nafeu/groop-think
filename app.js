@@ -18,30 +18,23 @@ app.use(express.static(__dirname + '/public'));
 
 var serverData = {
   sockets: {},
-  clientData: {}
+  clientData: {},
+  rooms: {}
 };
 
-var gameState = {
-  "phase": "start",
-  "questionIdx": 0,
-  "currQuestion": {},
-  "numActive": 0,
-  "numAnswers": 0,
-  "topAnswer": null,
-  "winner": null,
-  "players": {
-    // Iterate through client data and fill with
-    // socketid _ username
-    //         |_ score
-    //         |_ choice
-  },
-  next: function(){
-    var activePlayers = Object.keys(gameState.players);
-    switch (gameState.phase) {
+var statePusher = {
+  next: function(room) {
+    var activePlayers = Object.keys(serverData.rooms[room].players);
+    switch (serverData.rooms[room].phase) {
       case "start":
-        console.log("CURRENT PHASE", gameState.phase);
-        var clientIds = Object.keys(serverData.clientData);
-        gameState.numActive = clientIds.length;
+        console.log("CURRENT PHASE", serverData.rooms[room].phase);
+        var clientIds = [];
+        Object.keys(serverData.clientData).forEach(function(cid){
+          if (serverData.clientData[cid].room == room) {
+            clientIds.push(cid);
+          }
+        });
+        serverData.rooms[room].numActive = clientIds.length;
         for (var i = 0; i < clientIds.length; i++) {
           var playerObj = {
             name: serverData.clientData[clientIds[i]].name,
@@ -49,62 +42,62 @@ var gameState = {
             choice: null,
             increment: null
           };
-          gameState.players[clientIds[i]] = playerObj;
+          serverData.rooms[room].players[clientIds[i]] = playerObj;
         }
-        gameState.currQuestion = questions[gameState.questionIdx];
-        gameState.questionIdx++;
+        serverData.rooms[room].currQuestion = questions[serverData.rooms[room].questionIdx];
+        serverData.rooms[room].questionIdx++;
         console.log("SWITCHING PHASE TO QUESTION");
-        gameState.phase = "question";
+        serverData.rooms[room].phase = "question";
         break;
       case "question":
-        console.log("CURRENT PHASE", gameState.phase);
+        console.log("CURRENT PHASE", serverData.rooms[room].phase);
         var resultCounter = [];
-        for (var j = 0; j < gameState.currQuestion.a.length; j++) {
+        for (var j = 0; j < serverData.rooms[room].currQuestion.a.length; j++) {
           resultCounter.push(0);
         }
         for (var k = 0; k < activePlayers.length; k++) {
-          resultCounter[gameState.players[activePlayers[k]].choice] += 1;
+          resultCounter[serverData.rooms[room].players[activePlayers[k]].choice] += 1;
         }
-        gameState.topAnswer = gameState.currQuestion.a[indexOfMax(resultCounter)];
+        serverData.rooms[room].topAnswer = serverData.rooms[room].currQuestion.a[indexOfMax(resultCounter)];
         for (var l = 0; l < activePlayers.length; l++) {
-          if (gameState.players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
-            gameState.players[activePlayers[l]].score += 1;
-            gameState.players[activePlayers[l]].increment = "+1";
+          if (serverData.rooms[room].players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
+            serverData.rooms[room].players[activePlayers[l]].score += 1;
+            serverData.rooms[room].players[activePlayers[l]].increment = "+1";
           } else {
-            gameState.players[activePlayers[l]].increment = "-";
+            serverData.rooms[room].players[activePlayers[l]].increment = "-";
           }
         }
         console.log("SWITCHING PHASE TO RESULT");
-        gameState.phase = "result";
+        serverData.rooms[room].phase = "result";
         break;
       case "result":
-        console.log("CURRENT PHASE", gameState.phase);
-        if (gameState.questionIdx < questions.length) {
-          gameState.currQuestion = questions[gameState.questionIdx];
-          gameState.questionIdx++;
+        console.log("CURRENT PHASE", serverData.rooms[room].phase);
+        if (serverData.rooms[room].questionIdx < questions.length) {
+          serverData.rooms[room].currQuestion = questions[serverData.rooms[room].questionIdx];
+          serverData.rooms[room].questionIdx++;
           for (var m = 0; m < activePlayers.length; m++) {
-            gameState.players[activePlayers[m]].choice = null;
+            serverData.rooms[room].players[activePlayers[m]].choice = null;
           }
-          gameState.numAnswers = 0;
+          serverData.rooms[room].numAnswers = 0;
           console.log("SWITCHING PHASE TO QUESTION");
-          gameState.phase = "question";
+          serverData.rooms[room].phase = "question";
         } else {
           console.log("SWITCHING PHASE TO END");
-          gameState.phase = "end";
+          serverData.rooms[room].phase = "end";
         }
         break;
       case "end":
-        gameState.questionIdx = 0;
-        gameState.currQuestion = {};
-        gameState.numActive = 0;
-        gameState.numAnswers = 0;
-        gameState.topAnswer = null;
-        gameState.winner = null;
-        gameState.players = {};
-        gameState.phase = "start";
+        serverData.rooms[room].questionIdx = 0;
+        serverData.rooms[room].currQuestion = {};
+        serverData.rooms[room].numActive = 0;
+        serverData.rooms[room].numAnswers = 0;
+        serverData.rooms[room].topAnswer = null;
+        serverData.rooms[room].winner = null;
+        serverData.rooms[room].players = {};
+        serverData.rooms[room].phase = "start";
         break;
     }
-    uiManager.renderState();
+    uiManager.renderState(room);
   }
 };
 
@@ -136,27 +129,32 @@ var questions = [
 ];
 
 var uiManager = {
-  updateUsers: function() {
+  updateUsers: function(room) {
     var onlineUsers = [];
-    var clients = Object.keys(serverData.clientData);
+    var clients = [];
+    Object.keys(serverData.clientData).forEach(function(cid){
+      if (serverData.clientData[cid].room == room) {
+        clients.push(cid);
+      }
+    });
     for (var i = 0; i < clients.length; i++) {
       onlineUsers.push(serverData.clientData[clients[i]].name);
     }
-    io.sockets.emit('render', {
+    io.sockets.to(room).emit('render', {
       method: "update-online-users",
       content: onlineUsers
     });
   },
-  printToChat: function(data) {
-    io.sockets.emit('render', {
+  printToChat: function(room, data) {
+    io.sockets.to(room).emit('render', {
       method: "print-to-chat",
       content: data
     });
   },
-  renderState: function() {
-    io.sockets.emit('render', {
+  renderState: function(room) {
+    io.sockets.to(room).emit('render', {
       method: "game-state",
-      content: gameState
+      content: serverData.rooms[room]
     });
   }
 };
@@ -175,19 +173,40 @@ function removeClient(socket) {
   delete serverData.clientData[socket.id];
 }
 
+function getRoom(sid) {
+  return serverData.clientData[sid].room;
+}
+
+function createGameState() {
+  return {
+    "phase": "start",
+    "questionIdx": 0,
+    "currQuestion": {},
+    "numActive": 0,
+    "numAnswers": 0,
+    "topAnswer": null,
+    "winner": null,
+    "players": {}
+  };
+}
+
 function indexOfMax(arr) {
-    if (arr.length === 0) {
-        return -1;
+  if (arr.length === 0) {
+    return -1;
+  }
+  var max = arr[0];
+  var maxIndex = 0;
+  for (var i = 1; i < arr.length; i++) {
+    if (arr[i] > max) {
+      maxIndex = i;
+      max = arr[i];
     }
-    var max = arr[0];
-    var maxIndex = 0;
-    for (var i = 1; i < arr.length; i++) {
-        if (arr[i] > max) {
-            maxIndex = i;
-            max = arr[i];
-        }
-    }
-    return maxIndex;
+  }
+  return maxIndex;
+}
+
+function generateUID() {
+    return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -201,13 +220,20 @@ saveClient(socket);
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on('registerUser', function(data){
+  // TODO: Join a room here using data.room
+  if (!(serverData.rooms[data.room])) {
+    console.log("Creating game... : ", data.room);
+    serverData.rooms[data.room] = createGameState();
+  }
+  socket.join(data.room);
   serverData.clientData[socket.id] = data;
   socket.emit('render', {
     method: "game-state",
-    content: gameState
+    content: serverData.rooms[data.room]
   });
-  uiManager.printToChat({ type: "update", text: data.name + " has connected!"});
-  uiManager.updateUsers();
+  uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
+  uiManager.updateUsers(getRoom(socket.id));
+  console.log("Added new room : ", serverData.rooms);
 });
 
 socket.on('disconnect', function(){
@@ -217,33 +243,33 @@ socket.on('disconnect', function(){
     type: "update",
     text: user.name + " has disconnected!"
   });
-  uiManager.updateUsers();
+  uiManager.updateUsers(user.room);
 });
 
 socket.on('printToChat', function(data){
-  uiManager.printToChat(data);
+  uiManager.printToChat(getRoom(socket.id), data);
 });
 
 socket.on('nextState', function(){
-  gameState.next();
+  console.log("STATEPUSHER PUSHING ROOM : ", getRoom(socket.id), " for ", socket.id);
+  statePusher.next(getRoom(socket.id));
 });
 
 socket.on('submitAnswer', function(data){
-  console.log("Submitted answer: ", serverData.clientData[socket.id].name, data);
-  console.log("For " + gameState.players[socket.id].name + " the choice value is " + gameState.players[socket.id].choice);
-  if (gameState.players[socket.id] && (gameState.players[socket.id].choice === null)) {
-    gameState.players[socket.id].choice = data.answer;
-    gameState.numAnswers++;
-    io.sockets.emit('render', {
+  var room = getRoom(socket.id);
+  if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
+    serverData.rooms[room].players[socket.id].choice = data.answer;
+    serverData.rooms[room].numAnswers++;
+    io.sockets.to(room).emit('render', {
       method: "add-class",
       content: {
-        "id": "#userId-"+gameState.players[socket.id].name,
+        "id": "#userId-"+serverData.rooms[room].players[socket.id].name,
         "class": "submittedAnswer"
       }
     });
   }
-  if (gameState.numAnswers == gameState.numActive) {
-    gameState.next();
+  if (serverData.rooms[room].numAnswers == serverData.rooms[room].numActive) {
+    statePusher.next(getRoom(socket.id));
   }
 });
 
@@ -298,3 +324,17 @@ app.post('/api/users/validate', function(req, res){
 
 });
 
+app.get('/api/rooms/create', function(req, res) {
+  var room = generateUID();
+  res.json({ room: room });
+});
+
+app.post('/api/rooms/join', function(req, res) {
+  var exists = false;
+  if (serverData.rooms[req.body.room]) {
+    exists = true;
+  }
+  res.json({
+    exists: exists
+  });
+});

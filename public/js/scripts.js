@@ -4,6 +4,7 @@
 var socket = io();
 var user = {
   name: "",
+  room: ""
 };
 var COLORS = [
   '#922B21', '#B03A2E', '#76448A', '#6C3483',
@@ -18,12 +19,16 @@ $(function(){ // Document Ready - Start
 // DOM References
 var body = $("#content");
 var login = $("#login");
+var room = $("#room");
 var gameArea = $("#game-area");
 var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
 var usernameBox = $("#username-box");
 var usernameWarn = $("#username-warn");
+var roomBox = $("#room-box");
+var roomWarn = $("#room-warn");
+var roomCreate = $("#room-create-btn");
 
 // UI Rendering
 var UI = {
@@ -77,8 +82,13 @@ var UI = {
         break;
     }
   },
-  displayWarning: function(warning) {
+  displayUsernameWarn: function(warning) {
     usernameWarn
+      .css("color", warning.color)
+      .text(warning.message);
+  },
+  displayRoomWarn: function(warning) {
+    roomWarn
       .css("color", warning.color)
       .text(warning.message);
   },
@@ -173,7 +183,7 @@ var domFactory = {
         var player = $("<div></div>")
           .addClass("display-player")
           .attr("id", "userId-"+data.players[playerIds[i]].name)
-          .text(data.players[playerIds[i]].name + "-- score: " +
+          .text(data.players[playerIds[i]].name + " -- score: " +
             data.players[playerIds[i]].score + " (" +
             data.players[playerIds[i]].increment + ")")
           .css("color", getUsernameColor(data.players[playerIds[i]].name));
@@ -215,20 +225,46 @@ $(window).resize(function () {
 });
 
 // Default User Actions
-usernameBox.focus();
+
 
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
 // ---------------------------------------------------------------------------------------
 usernameBox.on('input', function(){
   if (usernameBox.val().length > 20) {
-    UI.displayWarning({
+    UI.displayUsernameWarn({
       color: "#CB4335",
       message: "Sorry, your name is too long"
     });
   } else {
     usernameWarn.html("");
   }
+});
+
+roomCreate.click(function(){
+  $.get("/api/rooms/create").done(function(data){
+    user.room = data.room;
+    showRegistration();
+  });
+});
+
+roomBox.enterKey(function(){
+  var roomId = roomBox.val().trim();
+  $.post("/api/rooms/join", { room: roomId }).done(function(data){
+    if (data.exists) {
+      user.room = roomId;
+      showRegistration();
+    } else {
+      UI.displayRoomWarn({
+        color: "purple",
+        message: "That room does not exist."
+      });
+    }
+  });
+});
+
+roomBox.on('input', function(){
+  roomWarn.html("");
 });
 
 usernameBox.enterKey(function(){
@@ -256,13 +292,13 @@ function registerUser(name) {
     if (data.valid) {
       user.name = name;
       socket.emit('registerUser', {
-        name: name
+        name: user.name,
+        room: user.room
       });
       showContent();
       updateChatBoxSize();
-      chatBox.focus();
     } else {
-      UI.displayWarning({
+      UI.displayUsernameWarn({
         color: data.color,
         message: data.message
       });
@@ -277,9 +313,16 @@ function updateChatBoxSize() {
   chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
 }
 
+function showRegistration() {
+  room.hide();
+  login.show();
+  usernameBox.focus();
+}
+
 function showContent() {
-  login.fadeOut();
-  body.fadeIn();
+  login.hide();
+  body.show();
+  chatBox.focus();
 }
 
 function getUsernameColor(username) {
@@ -292,6 +335,7 @@ function getUsernameColor(username) {
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
 }
+
 
 // ---------------------------------------------------------------------------------------
 }); // Document Ready - End
