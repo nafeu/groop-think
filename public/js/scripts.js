@@ -33,6 +33,7 @@ var roomCreate = $("#room-create-btn");
 var roomInfoBar = $("#room-info-bar");
 var roomInfoNotice = $("#room-info-notice");
 var roomInfoUrl = $("#room-info-url");
+var roomJoin = $("#room-join-btn");
 
 // UI Rendering
 var UI = {
@@ -245,13 +246,15 @@ if (queryVars.room) {
       user.room = queryVars.room;
       showRegistration();
     } else {
-      roomBox.val(queryVars.room);
       UI.displayRoomWarn({
         color: "purple",
-        message: "That room does not exist."
+        message: 'Room "' + queryVars.room + '" does not exist, please enter a correct room id.'
       });
+      room.fadeIn(200);
     }
   });
+} else {
+  room.fadeIn(200);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -276,18 +279,11 @@ roomCreate.click(function(){
 });
 
 roomBox.enterKey(function(){
-  var roomId = roomBox.val().trim();
-  $.post("/api/rooms/join", { room: roomId }).done(function(data){
-    if (data.exists) {
-      user.room = roomId;
-      showRegistration();
-    } else {
-      UI.displayRoomWarn({
-        color: "purple",
-        message: "That room does not exist."
-      });
-    }
-  });
+  attemptRoomJoin();
+});
+
+roomJoin.click(function(){
+  attemptRoomJoin();
 });
 
 roomBox.on('input', function(){
@@ -351,14 +347,14 @@ function updateChatBoxSize() {
 }
 
 function showRegistration() {
-  room.hide();
-  login.show();
+  room.fadeOut(200);
+  login.delay(400).fadeIn(200);
   usernameBox.focus();
 }
 
 function showContent() {
-  login.hide();
-  body.show();
+  login.fadeOut();
+  body.delay(400).fadeIn(200);
   chatBox.focus();
 }
 
@@ -380,6 +376,22 @@ function copyToClipboard(element) {
   document.execCommand("copy");
   $temp.remove();
 }
+
+function attemptRoomJoin() {
+  var roomId = roomBox.val().trim();
+  $.post("/api/rooms/join", { room: roomId }).done(function(data){
+    if (data.exists) {
+      user.room = roomId;
+      showRegistration();
+    } else {
+      UI.displayRoomWarn({
+        color: "purple",
+        message: "That room does not exist."
+      });
+    }
+  });
+}
+
 
 
 // ---------------------------------------------------------------------------------------

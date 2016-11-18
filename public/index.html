@@ -4,10 +4,13 @@
   <link rel="stylesheet" type="text/css" href="css/styles.css">
   <script src="/socket.io/socket.io.js"></script>
   <body>
-    <div id="room">
-      <h1>Start or join a game.</h1>
-      <div id="room-create-btn" type="text">Create Game</div>
+    <div id="room" style="display: none;">
+      <h1>Majority Rool!</h1>
+      <h3>Where popular opinion is finally worth something.</h3>
+      <div id="room-create-btn" type="text">Create new room</div>
+      <p class="or-sep">OR</p>
       <input id="room-box" type="text" placeholder="enter room id">
+      <div id="room-join-btn" type="text">Join existing room</div>
       <h2 id="room-warn"></h2>
     </div>
     <div id="login" style="display: none;">

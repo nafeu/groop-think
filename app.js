@@ -172,11 +172,12 @@ function removeClient(socket) {
   var occupied = serverData.clientData[socket.id];
   if (occupied) {
     if (occupied.room) {
-      serverData.rooms[occupied.room].numActive--;
-      if (serverData.rooms[occupied.room].numActive === 0) {
-        delete serverData.rooms[occupied.room];
+      if (serverData.rooms[occupied.room]) {
+        serverData.rooms[occupied.room].numActive--;
+        if (serverData.rooms[occupied.room].numActive === 0) {
+          delete serverData.rooms[occupied.room];
+        }
       }
-      delete serverData.rooms[occupied.room].players[socket.id];
     }
   }
   delete serverData.sockets[socket.id];
@@ -319,13 +320,25 @@ app.post('/api/users/validate', function(req, res){
   for (var i = 0; i < clients.length; i++) {
     if (serverData.clientData[clients[i]].name == name)
       valid = false;
-      message = "That name is already taken";
+      message = "That name is already taken.";
       color = "green";
   }
 
   if (req.body.name.length > 20) {
     valid = false;
-    message = "Sorry, your name is too long";
+    message = "Sorry, your name is too long.";
+    color = "#CB4335";
+  }
+
+  if (req.body.name.length < 2) {
+    valid = false;
+    message = "Sorry, your name is too short.";
+    color = "#CB4335";
+  }
+
+  if (req.body.name.length === 0) {
+    valid = false;
+    message = "At least TRY to enter a name.";
     color = "#CB4335";
   }
 
