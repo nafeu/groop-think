@@ -29,6 +29,9 @@ var usernameWarn = $("#username-warn");
 var roomBox = $("#room-box");
 var roomWarn = $("#room-warn");
 var roomCreate = $("#room-create-btn");
+var roomInfoBar = $("#room-info-bar");
+var roomInfoNotice = $("#room-info-notice");
+var roomInfoUrl = $("#room-info-url");
 
 // UI Rendering
 var UI = {
@@ -225,7 +228,22 @@ $(window).resize(function () {
 });
 
 // Default User Actions
-
+var queryVars = $.parseQuery();
+console.log(queryVars);
+if (queryVars.room) {
+  $.post("/api/rooms/join", { room: queryVars.room }).done(function(data){
+    if (data.exists) {
+      user.room = queryVars.room;
+      showRegistration();
+    } else {
+      roomBox.val(queryVars.room);
+      UI.displayRoomWarn({
+        color: "purple",
+        message: "That room does not exist."
+      });
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------------------
 // DOM Event Handlers
@@ -295,6 +313,16 @@ function registerUser(name) {
         name: user.name,
         room: user.room
       });
+      var gameUrl = location.host + location.pathname + "?room=" + user.room;
+      roomInfoUrl.text(location.protocol + "//" + gameUrl);
+      roomInfoNotice.text("Invite your friends! Share this link: ");
+      roomInfoBar.click(function(){
+        copyToClipboard(roomInfoUrl);
+        roomInfoNotice.text("Invite your friends! Copied to clipboard. ");
+      });
+      if ($.parseQuery.room != user.room)
+        window.history.pushState('', 'Title', '/?room='+user.room);
+      // update the gameUrl
       showContent();
       updateChatBoxSize();
     } else {
@@ -334,6 +362,14 @@ function getUsernameColor(username) {
   // Calculate color
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
+}
+
+function copyToClipboard(element) {
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val($(element).text()).select();
+  document.execCommand("copy");
+  $temp.remove();
 }
 
 

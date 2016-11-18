@@ -239,11 +239,13 @@ socket.on('registerUser', function(data){
 socket.on('disconnect', function(){
   var user = serverData.clientData[socket.id];
   removeClient(socket);
-  if (user) uiManager.printToChat({
-    type: "update",
-    text: user.name + " has disconnected!"
-  });
-  uiManager.updateUsers(user.room);
+  if (user) {
+    uiManager.printToChat({
+      type: "update",
+      text: user.name + " has disconnected!"
+    });
+    uiManager.updateUsers(user.room);
+  }
 });
 
 socket.on('printToChat', function(data){
