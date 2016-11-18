@@ -250,11 +250,11 @@ if (queryVars.room) {
         color: "purple",
         message: 'Room "' + queryVars.room + '" does not exist, please enter a correct room id.'
       });
-      room.fadeIn(200);
+      room.show();
     }
   });
 } else {
-  room.fadeIn(200);
+  room.show();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -347,14 +347,14 @@ function updateChatBoxSize() {
 }
 
 function showRegistration() {
-  room.fadeOut(200);
-  login.delay(400).fadeIn(200);
+  room.hide();
+  login.show();
   usernameBox.focus();
 }
 
 function showContent() {
-  login.fadeOut();
-  body.delay(400).fadeIn(200);
+  login.hide();
+  body.show();
   chatBox.focus();
 }
 

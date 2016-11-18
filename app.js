@@ -297,8 +297,8 @@ socket.on('submitAnswer', function(data){
 // ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------
-http.listen(3000, function(){
-  console.log('listening on localhost:3000');
+http.listen(process.env.PORT || 3000, function(){
+  console.log('listening on', http.address().port);
 });
 
 // ---------------------------------------------------------------------------------------
