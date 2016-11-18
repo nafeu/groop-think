@@ -4,7 +4,8 @@
 var socket = io();
 var user = {
   name: "",
-  room: ""
+  room: "",
+  active: false
 };
 var COLORS = [
   '#922B21', '#B03A2E', '#76448A', '#6C3483',
@@ -61,6 +62,8 @@ var UI = {
       case "game-state":
         var gameState = data.content;
         if (gameState.phase == "start") {
+          user.active = true;
+          console.log(user);
           gameArea.empty();
           gameArea.append(domFactory.build.startingDisplay(gameState));
         }
@@ -79,6 +82,7 @@ var UI = {
           gameArea.append(domFactory.build.resultDisplay(gameState));
         }
         if (gameState.phase == "end") {
+          user.active = false;
           gameArea.empty();
           gameArea.append(domFactory.build.endingDisplay(gameState));
         }
@@ -139,7 +143,7 @@ var domFactory = {
       return domFactory.assets.gameBoard()
         .append(domFactory.assets.topAnswer(data))
         .append(domFactory.assets.scores(data))
-        .append(domFactory.assets.nextBtn("continue..."));
+        .append(domFactory.assets.activeNextBtn("continue..."));
     },
     endingDisplay: function(data) {
       return domFactory.assets.gameBoard()
@@ -161,7 +165,7 @@ var domFactory = {
         var choice = $("<div></div>")
           .addClass("display-choice")
           .text(choices[i])
-          .attr("onclick", "socket.emit('submitAnswer', { 'answer' : " + i + "})");
+          .attr("onclick", "if (user.active) socket.emit('submitAnswer', { 'answer': " + i + "});");
         out.append(choice);
       }
       return out;
@@ -217,6 +221,11 @@ var domFactory = {
     nextBtn: function(msg) {
       return $("<h1></h1>").text(msg).click(function(){
         socket.emit("nextState");
+      });
+    },
+    activeNextBtn: function(msg) {
+      return $("<h1></h1>").text(msg).click(function(){
+        if (user.active) socket.emit("nextState");
       });
     }
   }

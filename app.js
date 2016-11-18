@@ -169,6 +169,16 @@ function saveClient(socket) {
 
 function removeClient(socket) {
   console.log("<< removing client >> : ", socket.id);
+  var occupied = serverData.clientData[socket.id];
+  if (occupied) {
+    if (occupied.room) {
+      serverData.rooms[occupied.room].numActive--;
+      if (serverData.rooms[occupied.room].numActive === 0) {
+        delete serverData.rooms[occupied.room];
+      }
+      delete serverData.rooms[occupied.room].players[socket.id];
+    }
+  }
   delete serverData.sockets[socket.id];
   delete serverData.clientData[socket.id];
 }
@@ -258,6 +268,7 @@ socket.on('nextState', function(){
 });
 
 socket.on('submitAnswer', function(data){
+  console.log("Submitted answer : ", data);
   var room = getRoom(socket.id);
   if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
     serverData.rooms[room].players[socket.id].choice = data.answer;
