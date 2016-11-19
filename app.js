@@ -107,6 +107,11 @@ var questions = [
     "a": [
       "apple",
       "orange",
+      "orange",
+      "orange",
+      "orange",
+      "orange",
+      "orange",
       "pineapple"
     ]
   },
@@ -271,6 +276,7 @@ socket.on('nextState', function(){
 socket.on('submitAnswer', function(data){
   console.log("Submitted answer : ", data);
   var room = getRoom(socket.id);
+  console.log(serverData.rooms[room]);
   if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
     serverData.rooms[room].players[socket.id].choice = data.answer;
     serverData.rooms[room].numAnswers++;

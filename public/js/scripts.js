@@ -178,8 +178,17 @@ var domFactory = {
         var player = $("<div></div>")
           .addClass("display-player")
           .attr("id", "userId-"+data.players[playerIds[i]].name)
+          .css("border-color", getUsernameColor(data.players[playerIds[i]].name));
+        var playerName = $("<div></div>")
+          .addClass("display-player-name")
           .text(data.players[playerIds[i]].name)
           .css("color", getUsernameColor(data.players[playerIds[i]].name));
+        var playerScore = $("<div></div>")
+          .addClass("display-player-score")
+          .text(data.players[playerIds[i]].score);
+        player
+          .append(playerName)
+          .append(playerScore);
         out.append(player);
       }
       return out;
