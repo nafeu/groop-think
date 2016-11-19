@@ -81,6 +81,16 @@ var UI = {
           console.log("calling result block... : ", user.name);
           gameArea.empty();
           gameArea.append(domFactory.build.resultDisplay(gameState));
+          var counter = parseInt($("#countdown-timer-num").text());
+          var interval = setInterval(function() {
+            if (counter == 1) {
+              socket.emit("nextState");
+              clearInterval(interval);
+            } else {
+              counter--;
+              $("#countdown-timer-num").text(counter);
+            }
+          }, 1000);
         }
         if (gameState.phase == "end") {
           user.active = false;
@@ -144,7 +154,7 @@ var domFactory = {
       return domFactory.assets.gameBoard()
         .append(domFactory.assets.topAnswer(data))
         .append(domFactory.assets.scores(data))
-        .append(domFactory.assets.activeNextBtn("continue..."));
+        .append(domFactory.assets.countdown("next question in ", 10));
     },
     endingDisplay: function(data) {
       return domFactory.assets.gameBoard()
@@ -237,6 +247,20 @@ var domFactory = {
       return $("<h1></h1>").text(msg).click(function(){
         if (user.active) socket.emit("nextState");
       });
+    },
+    countdown: function(msg, seconds) {
+      return $("<h1></h1>")
+        .attr("id", "countdown-timer")
+        .append(
+          $("<span></span>")
+            .text(msg)
+            .addClass("countdown-timer-msg")
+        )
+        .append(
+          $("<span></span>")
+            .attr("id", "countdown-timer-num")
+            .text(seconds)
+        );
     }
   }
 };
