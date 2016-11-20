@@ -69,6 +69,10 @@ var statePusher = {
         }
         console.log("SWITCHING PHASE TO RESULT");
         serverData.rooms[room].phase = "result";
+        var interval = setInterval(function() {
+          statePusher.next(room);
+          clearInterval(interval);
+        }, 7000);
         break;
       case "result":
         console.log("CURRENT PHASE", serverData.rooms[room].phase);
@@ -106,11 +110,6 @@ var questions = [
     "q": "What is the best fruit?",
     "a": [
       "apple",
-      "orange",
-      "orange",
-      "orange",
-      "orange",
-      "orange",
       "orange",
       "pineapple"
     ]

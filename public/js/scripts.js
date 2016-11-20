@@ -84,12 +84,10 @@ var UI = {
           var counter = parseInt($("#countdown-timer-num").text());
           var interval = setInterval(function() {
             if (counter == 1) {
-              socket.emit("nextState");
               clearInterval(interval);
-            } else {
-              counter--;
-              $("#countdown-timer-num").text(counter);
             }
+            counter--;
+            $("#countdown-timer-num").text(counter);
           }, 1000);
         }
         if (gameState.phase == "end") {
@@ -154,7 +152,8 @@ var domFactory = {
       return domFactory.assets.gameBoard()
         .append(domFactory.assets.topAnswer(data))
         .append(domFactory.assets.scores(data))
-        .append(domFactory.assets.countdown("next question in ", 10));
+        .append(domFactory.assets.countdown("next question in ", 7));
+        // .append(domFactory.assets.activeNextBtn("next question"));
     },
     endingDisplay: function(data) {
       return domFactory.assets.gameBoard()
@@ -249,7 +248,7 @@ var domFactory = {
       });
     },
     countdown: function(msg, seconds) {
-      return $("<h1></h1>")
+      return $("<div></div>")
         .attr("id", "countdown-timer")
         .append(
           $("<span></span>")
