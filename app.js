@@ -62,7 +62,7 @@ var statePusher = {
         for (var l = 0; l < activePlayers.length; l++) {
           if (serverData.rooms[room].players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
             serverData.rooms[room].players[activePlayers[l]].score += 1;
-            serverData.rooms[room].players[activePlayers[l]].increment = "Majority! +1 point";
+            serverData.rooms[room].players[activePlayers[l]].increment = "Majority! +1";
           } else {
             serverData.rooms[room].players[activePlayers[l]].increment = "Minority... :(";
           }

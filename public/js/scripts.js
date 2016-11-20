@@ -213,10 +213,16 @@ var domFactory = {
         var player = $("<div></div>")
           .addClass("display-player")
           .attr("id", "userId-"+data.players[playerIds[i]].name)
-          .text(data.players[playerIds[i]].name + " -- score: " +
-            data.players[playerIds[i]].score + " (" +
-            data.players[playerIds[i]].increment + ")")
-          .css("color", getUsernameColor(data.players[playerIds[i]].name));
+          .css("border-color", getUsernameColor(data.players[playerIds[i]].name))
+          .append(
+            $("<div></div>")
+              .addClass("display-player-name")
+              .text(data.players[playerIds[i]].name)
+              .css("color", getUsernameColor(data.players[playerIds[i]].name)))
+          .append(
+            $("<div></div>")
+              .addClass("display-player-increment")
+              .text(data.players[playerIds[i]].increment));
         out.append(player);
       }
       return out;
