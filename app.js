@@ -177,7 +177,14 @@ function removeClient(socket) {
   if (occupied) {
     if (occupied.room) {
       if (serverData.rooms[occupied.room]) {
+        if (
+            (serverData.rooms[occupied.room].numAnswers >= serverData.rooms[occupied.room].numActive) &&
+            (serverData.rooms[occupied.room].phase == "question")) {
+          statePusher.next(occupied.room);
+        }
+        delete serverData.rooms[occupied.room].players[socket.id];
         serverData.rooms[occupied.room].numActive--;
+        // TODO: Delete the user as well
         if (serverData.rooms[occupied.room].numActive === 0) {
           delete serverData.rooms[occupied.room];
         }
@@ -287,7 +294,7 @@ socket.on('submitAnswer', function(data){
       }
     });
   }
-  if (serverData.rooms[room].numAnswers == serverData.rooms[room].numActive) {
+  if (serverData.rooms[room].numAnswers >= serverData.rooms[room].numActive) {
     statePusher.next(getRoom(socket.id));
   }
 });
