@@ -218,7 +218,16 @@ var domFactory = {
       return out;
     },
     topAnswer: function(data) {
-      return $("<h1></h1>").text("The most popular answer was '" + data.topAnswer + "'");
+      var answer = $("<div></div>")
+        .addClass("display-popular-top")
+        .text(data.topAnswer);
+      return $("<div></div>")
+        .attr("id", "display-popular")
+        .append(
+          $("<div></div>")
+            .addClass("display-popular-header")
+            .text("The most popular answer was")
+        .append(answer));
     },
     winner: function(data) {
       var out = $("<div></div>").attr("id", "display-winner");

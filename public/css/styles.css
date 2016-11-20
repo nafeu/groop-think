@@ -182,7 +182,7 @@ input {
   border-bottom: 1px solid #e3e3e3;
 }
 
-#display-players {
+#display-players, #display-popular {
   padding: 10px;
 }
 
@@ -219,4 +219,23 @@ input {
 .submittedAnswer {
   font-size: 0.7em;
   opacity: 0.5;
+}
+
+#display-popular {
+  text-align: center;
+}
+
+#display-popular .display-popular-header {
+  font-size: 1.6em;
+}
+
+#display-popular .display-popular-top {
+  font-size: 1.7em;
+  font-weight: bold;
+}
+
+#countdown-timer {
+  font-size: 1.3em;
+  color: #e3e3e3;
+  text-align: center;
 }

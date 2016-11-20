@@ -62,9 +62,9 @@ var statePusher = {
         for (var l = 0; l < activePlayers.length; l++) {
           if (serverData.rooms[room].players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
             serverData.rooms[room].players[activePlayers[l]].score += 1;
-            serverData.rooms[room].players[activePlayers[l]].increment = "+1";
+            serverData.rooms[room].players[activePlayers[l]].increment = "Majority! +1 point";
           } else {
-            serverData.rooms[room].players[activePlayers[l]].increment = "-";
+            serverData.rooms[room].players[activePlayers[l]].increment = "Minority... :(";
           }
         }
         console.log("SWITCHING PHASE TO RESULT");
@@ -184,6 +184,7 @@ function removeClient(socket) {
         }
         delete serverData.rooms[occupied.room].players[socket.id];
         serverData.rooms[occupied.room].numActive--;
+        serverData.rooms[occupied.room].numAnswers--;
         // TODO: Delete the user as well
         if (serverData.rooms[occupied.room].numActive === 0) {
           delete serverData.rooms[occupied.room];
