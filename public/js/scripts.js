@@ -152,7 +152,11 @@ var domFactory = {
       return domFactory.assets.gameBoard()
         .append(domFactory.assets.topAnswer(data))
         .append(domFactory.assets.scores(data))
-        .append(domFactory.assets.countdown("next question in ", 7));
+        .append(domFactory.assets.countdown(function(){
+          if (data.questionIdx == data.gameLength)
+            return "showing winner in ";
+          return "next question in ";
+        }, 7));
         // .append(domFactory.assets.activeNextBtn("next question"));
     },
     endingDisplay: function(data) {

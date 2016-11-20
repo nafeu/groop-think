@@ -76,7 +76,7 @@ var statePusher = {
         break;
       case "result":
         console.log("CURRENT PHASE", serverData.rooms[room].phase);
-        if (serverData.rooms[room].questionIdx < questions.length) {
+        if (serverData.rooms[room].questionIdx < serverData.rooms[room].gameLength) {
           serverData.rooms[room].currQuestion = questions[serverData.rooms[room].questionIdx];
           serverData.rooms[room].questionIdx++;
           for (var m = 0; m < activePlayers.length; m++) {
@@ -204,6 +204,7 @@ function createGameState() {
   return {
     "phase": "start",
     "questionIdx": 0,
+    "gameLength": questions.length,
     "currQuestion": {},
     "numActive": 0,
     "numAnswers": 0,
