@@ -170,7 +170,22 @@ var domFactory = {
       return $("<div></div>").attr("id", "game-board");
     },
     question: function(data) {
-      return $("<div></div>").attr("id", "display-question").text(data.currQuestion.q);
+      return $("<div></div>").attr("id", "display-question")
+        .append(
+          $("<div></div>")
+            .addClass("display-question-asker")
+            .text(function(){
+              if (data.currQuestion.by.length > 0)
+                return data.currQuestion.by + " asks";
+              else
+                return "anonymous asks:";
+            })
+        )
+        .append(
+          $("<div></div>")
+            .addClass("display-question-text")
+            .text(data.currQuestion.q)
+        );
     },
     answers: function(data) {
       var out = $("<div></div>").attr("id", "display-answers");
@@ -228,16 +243,24 @@ var domFactory = {
       return out;
     },
     topAnswer: function(data) {
-      var answer = $("<div></div>")
-        .addClass("display-popular-top")
-        .text(data.topAnswer);
-      return $("<div></div>")
-        .attr("id", "display-popular")
-        .append(
+      var out = $("<div></div>").attr("id", "display-popular");
+      if (data.tiedScoreCounter > 1) {
+        out.append(
+          $("<div></div>")
+            .addClass("display-popular-header")
+            .text("Even split. No points! No majority!"));
+      } else {
+        var answer = $("<div></div>")
+          .addClass("display-popular-top")
+          .text(data.topAnswer);
+        out.append(
           $("<div></div>")
             .addClass("display-popular-header")
             .text("The most popular answer was")
         .append(answer));
+      }
+      return out;
+
     },
     winner: function(data) {
       var out = $("<div></div>").attr("id", "display-winner");

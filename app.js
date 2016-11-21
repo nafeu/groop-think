@@ -58,13 +58,27 @@ var statePusher = {
         for (var k = 0; k < activePlayers.length; k++) {
           resultCounter[serverData.rooms[room].players[activePlayers[k]].choice] += 1;
         }
-        serverData.rooms[room].topAnswer = serverData.rooms[room].currQuestion.a[indexOfMax(resultCounter)];
+        var majorityIdx = indexOfMax(resultCounter);
+        serverData.rooms[room].tiedScoreCounter = 0;
+        serverData.rooms[room].topAnswer = serverData.rooms[room].currQuestion.a[majorityIdx];
+        console.log(resultCounter);
+        resultCounter.forEach(function(item){
+          if (item == resultCounter[majorityIdx]) {
+            console.log("This is the item inside result counter: ", item);
+            serverData.rooms[room].tiedScoreCounter++;
+            console.log("Incrementing tied score counter: ", serverData.rooms[room].tiedScoreCounter);
+          }
+        });
         for (var l = 0; l < activePlayers.length; l++) {
-          if (serverData.rooms[room].players[activePlayers[l]].choice == indexOfMax(resultCounter)) {
-            serverData.rooms[room].players[activePlayers[l]].score += 1;
-            serverData.rooms[room].players[activePlayers[l]].increment = "Majority! +1";
+          if (serverData.rooms[room].tiedScoreCounter > 1) {
+            serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.even();
           } else {
-            serverData.rooms[room].players[activePlayers[l]].increment = "Minority... :(";
+            if (serverData.rooms[room].players[activePlayers[l]].choice == majorityIdx) {
+              serverData.rooms[room].players[activePlayers[l]].score += 1;
+              serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.majority();
+            } else {
+              serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.minority();
+            }
           }
         }
         console.log("SWITCHING PHASE TO RESULT");
@@ -75,7 +89,6 @@ var statePusher = {
         }, 7000);
         break;
       case "result":
-        console.log("CURRENT PHASE", serverData.rooms[room].phase);
         if (serverData.rooms[room].questionIdx < serverData.rooms[room].gameLength) {
           serverData.rooms[room].currQuestion = questions[serverData.rooms[room].questionIdx];
           serverData.rooms[room].questionIdx++;
@@ -83,10 +96,8 @@ var statePusher = {
             serverData.rooms[room].players[activePlayers[m]].choice = null;
           }
           serverData.rooms[room].numAnswers = 0;
-          console.log("SWITCHING PHASE TO QUESTION");
           serverData.rooms[room].phase = "question";
         } else {
-          console.log("SWITCHING PHASE TO END");
           serverData.rooms[room].phase = "end";
         }
         break;
@@ -112,7 +123,8 @@ var questions = [
       "apple",
       "orange",
       "pineapple"
-    ]
+    ],
+    "by": "Nafoodle"
   },
   {
     "q": "What is the worst fruit?",
@@ -120,7 +132,8 @@ var questions = [
       "durian",
       "kiwi",
       "coconut"
-    ]
+    ],
+    "by": "Nafoodle"
   },
   {
     "q": "What is the best worst fruit?",
@@ -128,9 +141,51 @@ var questions = [
       "applepen",
       "pineapplepen",
       "penpinappleapplepen"
-    ]
+    ],
+    "by": ""
   }
 ];
+
+var scoreMessages = {
+  majorityMessages: [
+    "Look at me I'm sheeple",
+    "Majority YEAH",
+    "We observe collective thought",
+    "Yeah I naw what you mean",
+    "My opinion is better than yours",
+    "I'm more equal than you",
+    "I watch FOX News",
+    "The hive mind... yes",
+    "Sucks to be ya",
+    "Ur mad cuz bad",
+    "420 noscope blazeit"
+  ],
+  minorityMessages: [
+    "Fuck you I won't do what you tell me",
+    "Unpopular opinion puffin",
+    "Shut the front door",
+    "Originality is key except in this game",
+    "Who gives a shit honestly",
+    "Hipster till I die bruh",
+    "I don't like things because other people do"
+  ],
+  evenMessages: [
+    "Feeling a little too original aren't we",
+    "3 original 4 me",
+    "Even split my ass",
+    "Whatever, at least we unique y'all",
+    "I'm a special snowflake"
+  ],
+  majority: function(){
+    return this.majorityMessages[Math.floor(Math.random()*this.majorityMessages.length)] + ", +1";
+  },
+  minority: function(){
+    return this.minorityMessages[Math.floor(Math.random()*this.minorityMessages.length)] + ", no points";
+  },
+  even: function(){
+    return this.evenMessages[Math.floor(Math.random()*this.evenMessages.length)];
+  }
+};
 
 var uiManager = {
   updateUsers: function(room) {
@@ -209,6 +264,7 @@ function createGameState() {
     "numActive": 0,
     "numAnswers": 0,
     "topAnswer": null,
+    "tiedScoreCounter": 0,
     "winner": null,
     "players": {}
   };
@@ -284,7 +340,6 @@ socket.on('nextState', function(){
 socket.on('submitAnswer', function(data){
   console.log("Submitted answer : ", data);
   var room = getRoom(socket.id);
-  console.log(serverData.rooms[room]);
   if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
     serverData.rooms[room].players[socket.id].choice = data.answer;
     serverData.rooms[room].numAnswers++;

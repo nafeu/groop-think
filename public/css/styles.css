@@ -170,7 +170,13 @@ input {
   text-align: center;
 }
 
-#display-question {
+#display-question .display-question-asker {
+  font-size: 1.3em;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+#display-question .display-question-text {
   font-size: 1.8em;
   font-weight: bold;
   padding: 0px 10px 0px 10px;
@@ -182,7 +188,7 @@ input {
   border-bottom: 1px solid #e3e3e3;
 }
 
-#display-players, #display-popular {
+#display-players, #display-popular, #display-scores {
   padding: 10px;
 }
 
