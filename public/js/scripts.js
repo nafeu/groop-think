@@ -170,6 +170,7 @@ var domFactory = {
       return $("<div></div>").attr("id", "game-board");
     },
     question: function(data) {
+      console.log("CURR Q DATA: ", data);
       return $("<div></div>").attr("id", "display-question")
         .append(
           $("<div></div>")

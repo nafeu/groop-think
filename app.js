@@ -62,10 +62,13 @@ http.get(url, function(res){
       questions = questionLib;
     } else {
       for (var i = 0; i < gameLengthSetting; i++) {
-        question.push(questionLib.splice(Math.floor(Math.random()*questionLib.length), 1));
+        var randInt = Math.floor(Math.random()*questionLib.length);
+        var toPush = questionLib.splice(randInt, 1)[0];
+        questions.push(toPush);
+        // console.log("PUSHING NOW: ", i, toPush);
       }
     }
-    console.log(questions);
+    // console.log(questions);
   });
 }).on('error', function(e){
     console.log("Got an error: ", e);
