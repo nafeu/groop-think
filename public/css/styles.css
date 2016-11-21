@@ -245,3 +245,9 @@ input {
   color: #e3e3e3;
   text-align: center;
 }
+
+#display-winner {
+  text-align: center;
+  font-size: 2em;
+  padding-bottom: 10px;
+}

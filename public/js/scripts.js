@@ -140,7 +140,12 @@ var domFactory = {
     },
     startingDisplay: function(data) {
       return domFactory.assets.gameBoard()
-        .append(domFactory.assets.nextBtn("Click to start game!"));
+        .append("<h1>Majority Rool!</h1>")
+        .append("<h4 style='text-align: center;'>Pick the answer that you think is in the majority and you get points.</h4>")
+        .append("<h4 style='text-align: center;'>If you are in the majority, you get 1 point.</h4>")
+        .append("<h4 style='text-align: center;'>If you are in the minority, you get no points.</h4>")
+        .append("<h4 style='text-align: center;'>If there is an even split with no real majority, NO one gets points.</h4>")
+        .append(domFactory.assets.nextBtn("Click to start game."));
     },
     questionDisplay: function(data) {
       return domFactory.assets.gameBoard()
