@@ -98,7 +98,8 @@ var statePusher = {
             name: serverData.clientData[clientIds[i]].name,
             score: 0,
             choice: null,
-            increment: null
+            increment: null,
+            points: null
           };
           serverData.rooms[room].players[clientIds[i]] = playerObj;
         }
@@ -130,12 +131,15 @@ var statePusher = {
         for (var l = 0; l < activePlayers.length; l++) {
           if (serverData.rooms[room].tiedScoreCounter > 1) {
             serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.even();
+            serverData.rooms[room].players[activePlayers[l]].points = false;
           } else {
             if (serverData.rooms[room].players[activePlayers[l]].choice == majorityIdx) {
               serverData.rooms[room].players[activePlayers[l]].score += 1;
               serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.majority();
+              serverData.rooms[room].players[activePlayers[l]].points = true;
             } else {
               serverData.rooms[room].players[activePlayers[l]].increment = scoreMessages.minority();
+              serverData.rooms[room].players[activePlayers[l]].points = false;
             }
           }
         }

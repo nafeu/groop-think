@@ -229,12 +229,12 @@ var domFactory = {
         var player = $("<div></div>")
           .addClass("display-player")
           .attr("id", "userId-"+data.players[playerIds[i]].name)
-          .css("border-color", getUsernameColor(data.players[playerIds[i]].name))
+          .css("border-color", getResultColor(data.players[playerIds[i]]))
           .append(
             $("<div></div>")
               .addClass("display-player-name")
               .text(data.players[playerIds[i]].name)
-              .css("color", getUsernameColor(data.players[playerIds[i]].name)))
+              .css("color", getResultColor(data.players[playerIds[i]])))
           .append(
             $("<div></div>")
               .addClass("display-player-increment")
@@ -450,6 +450,16 @@ function copyToClipboard(element) {
   $temp.val($(element).text()).select();
   document.execCommand("copy");
   $temp.remove();
+}
+
+function getResultColor(player) {
+  if (player) {
+    if (player.points)
+      return "green";
+    else
+      return "red";
+  }
+  return "purple";
 }
 
 function attemptRoomJoin() {
