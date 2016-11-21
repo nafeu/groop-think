@@ -1,8 +1,9 @@
 var express = require('express');
 var app = express();
-var http = require('http').Server(app);
+var http = require('http');
+var server = require('http').Server(app);
 var bodyParser = require('body-parser');
-var io = require('socket.io')(http);
+var io = require('socket.io')(server);
 io.set('heartbeat timeout', 4000);
 io.set('heartbeat interval', 2000);
 
@@ -15,6 +16,60 @@ app.use(bodyParser.json());
 // Routing
 // ---------------------------------------------------------------------------------------
 app.use(express.static(__dirname + '/public'));
+
+var questions = [
+  {
+    "q": "Who is best equipped to run America?",
+    "a": [
+      "Donald Trump",
+      "Hillary Clinton",
+      "Hilary Duff",
+      "Donald Duck"
+    ],
+    "by": "@phrakturemusic"
+  },
+  {
+    "q": "What is the proper pronounciation of GIF?",
+    "a": [
+      "JIFF, similar to the J in Jerry",
+      "GIF, similar to G in Guild"
+    ],
+    "by": "@phrakturemusic"
+  },
+  {
+    "q": "Which animal would be more affective in close quarters combat when equipped with a 12-gauge shotgun?",
+    "a": [
+      "Hamster",
+      "Squirrel",
+      "Hedgehog"
+    ],
+    "by": "@phrakturemusic"
+  }
+];
+
+var url = "http://phrakture.com/apps/mrsubmission/data/questions.json";
+http.get(url, function(res){
+  var body = '';
+  res.on('data', function(chunk){
+    body += chunk;
+  });
+  res.on('end', function(){
+    var apiRes = JSON.parse(body);
+    var questionLib = apiRes;
+    questions = [];
+    var gameLengthSetting = 10;
+    if (questionLib.length < gameLengthSetting) {
+      questions = questionLib;
+    } else {
+      for (var i = 0; i < gameLengthSetting; i++) {
+        question.push(questionLib.splice(Math.floor(Math.random()*questionLib.length), 1));
+      }
+    }
+    console.log(questions);
+  });
+}).on('error', function(e){
+    console.log("Got an error: ", e);
+});
 
 var serverData = {
   sockets: {},
@@ -115,36 +170,6 @@ var statePusher = {
     uiManager.renderState(room);
   }
 };
-
-var questions = [
-  {
-    "q": "What is the best fruit?",
-    "a": [
-      "apple",
-      "orange",
-      "pineapple"
-    ],
-    "by": "Nafoodle"
-  },
-  {
-    "q": "What is the worst fruit?",
-    "a": [
-      "durian",
-      "kiwi",
-      "coconut"
-    ],
-    "by": "Nafoodle"
-  },
-  {
-    "q": "What is the best worst fruit?",
-    "a": [
-      "applepen",
-      "pineapplepen",
-      "penpinappleapplepen"
-    ],
-    "by": ""
-  }
-];
 
 var scoreMessages = {
   majorityMessages: [
@@ -366,8 +391,8 @@ socket.on('submitAnswer', function(data){
 // ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------
-http.listen(process.env.PORT || 3000, function(){
-  console.log('listening on', http.address().port);
+server.listen(process.env.PORT || 3000, function(){
+  console.log('listening on', server.address().port);
 });
 
 // ---------------------------------------------------------------------------------------
