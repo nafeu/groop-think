@@ -47,32 +47,39 @@ var questions = [
   }
 ];
 
-var url = "http://phrakture.com/apps/mrsubmission/data/questions.json";
-http.get(url, function(res){
-  var body = '';
-  res.on('data', function(chunk){
-    body += chunk;
-  });
-  res.on('end', function(){
-    var apiRes = JSON.parse(body);
-    var questionLib = apiRes;
-    questions = [];
-    var gameLengthSetting = 10;
-    if (questionLib.length < gameLengthSetting) {
-      questions = questionLib;
-    } else {
-      for (var i = 0; i < gameLengthSetting; i++) {
-        var randInt = Math.floor(Math.random()*questionLib.length);
-        var toPush = questionLib.splice(randInt, 1)[0];
-        questions.push(toPush);
-        // console.log("PUSHING NOW: ", i, toPush);
+function resetQuestions() {
+  var url = "http://phrakture.com/apps/mrsubmission/data/questions.json";
+  http.get(url, function(res){
+    var body = '';
+    res.on('data', function(chunk){
+      body += chunk;
+    });
+    res.on('end', function(){
+      var apiRes = JSON.parse(body);
+      var questionLib = apiRes;
+      console.log("QLIB LENGTH : ", questionLib.length);
+      questions = [];
+      var gameLengthSetting = 10;
+      if (questionLib.length < gameLengthSetting) {
+        questions = questionLib;
+      } else {
+        for (var i = 0; i < gameLengthSetting; i++) {
+          var randInt = Math.floor(Math.random()*questionLib.length);
+          var toPush = questionLib.splice(randInt, 1)[0];
+          questions.push(toPush);
+          console.log("Adding question: ", i, toPush.q);
+        }
       }
-    }
-    // console.log(questions);
+      questionLib.forEach(function(item){
+        console.log("QLIB : ", item.q);
+      });
+    });
+  }).on('error', function(e){
+      console.log("Got an error: ", e);
   });
-}).on('error', function(e){
-    console.log("Got an error: ", e);
-});
+}
+
+resetQuestions();
 
 var serverData = {
   sockets: {},
@@ -164,6 +171,7 @@ var statePusher = {
         }
         break;
       case "end":
+        resetQuestions();
         serverData.rooms[room].questionIdx = 0;
         serverData.rooms[room].currQuestion = {};
         serverData.rooms[room].numActive = 0;
