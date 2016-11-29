@@ -286,9 +286,7 @@ socket.on('submitAnswer', function(data){
 // Server Config
 // ---------------------------------------------------------------------------------------
 server.listen(process.env.PORT || 3000, function(){
-  console.log("\n------------------------------------");
-  console.log('Application server listening on', server.address().port);
-  console.log("------------------------------------\n");
+  console.log('<< Application server listening on '.blue.bold + server.address().port + ' >>'.blue.bold);
   prompt();
 });
 
