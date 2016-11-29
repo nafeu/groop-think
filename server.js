@@ -8,47 +8,43 @@ var msgt = require('./components/msg-tools');
 var config = require('./config.js');
 var gd = require('./components/game-deck');
 var colors = require('colors');
+var readline = require('readline');
 
 // ---------------------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------------------
 
 // debugger
-function debug(msg, color, cb) {
-  if (config.debug || process.env.DEBUG === true) {
-    if (color) {
-      console.log(colors[color](msg));
-      if (cb) cb();
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false,
+});
+
+if (config.debug) {
+  rl.on('line', function(command){
+    switch (command) {
+      case "h":
+      case "help":
+        debug(
+          "sd, server data --- display server data\n"+
+          "fc, fetch cards --- display available cards from DB\n"+
+          "client [id] --- display client info\n"
+        );
+        break;
+      case "sd":
+      case "server data":
+        logServerData();
+        break;
+      case "fc":
+      case "fetch cards":
+        logCardsDB();
+        break;
+      default:
+        debug("Error: unrecognized command '"+command+"', try 'help' for a list of commands.");
+        break;
     }
-    else {
-      console.log(msg);
-      if (cb) cb();
-    }
-  }
-}
-
-function getTimeStamp() {
-
-  var now = new Date();
-  var hours = now.getHours();
-  var minutes = now.getMinutes();
-  var seconds = now.getSeconds();
-  var ampm = "AM";
-
-  if (hours > 12) {
-    hours -= 12;
-    ampm = "PM";
-  }
-
-  if (minutes < 10) {
-    minutes = "0"+minutes;
-  }
-
-  if (seconds < 10) {
-    seconds = "0"+seconds;
-  }
-
-  return hours + ":" + minutes + ":" + seconds + " " + ampm;
+  });
 }
 
 // socket.io configs
@@ -74,6 +70,44 @@ var statePusher = require('./components/state-pusher')(serverData, uiManager, gd
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
+function prompt() {
+  if (config.debug) rl.prompt();
+}
+
+function debug(msg, color, cb) {
+  process.stdout.clearLine();
+  if (config.debug || process.env.DEBUG === true) {
+    if (color) {
+      console.log(colors[color](msg));
+      if (cb) cb();
+    }
+    else {
+      console.log(msg);
+      if (cb) cb();
+    }
+  }
+  prompt();
+}
+
+function getTimeStamp() {
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var ampm = "AM";
+  if (hours > 12) {
+    hours -= 12;
+    ampm = "PM";
+  }
+  if (minutes < 10) {
+    minutes = "0"+minutes;
+  }
+  if (seconds < 10) {
+    seconds = "0"+seconds;
+  }
+  return hours + ":" + minutes + ":" + seconds + " " + ampm;
+}
+
 function logServerData() {
   debug("\n[ Server Data - ".bold + getTimeStamp().bold + " ]".bold, "blue", function(){
     console.log("Clients:".underline);
@@ -102,6 +136,12 @@ function logServerData() {
   });
 }
 
+function logCardsDB() {
+  gd.fetchCards(function(cards){
+    debug(JSON.stringify(cards, null, 2));
+  });
+}
+
 function shortenQuestion(q) {
   if (q) {
     if (q.length > 40)
@@ -118,11 +158,10 @@ function saveClient(socket) {
     console.log("ip address: ".green, socket.request.connection.remoteAddress);
   });
   serverData.sockets[socket.id] = socket;
-  logServerData();
 }
 
 function removeClient(socket) {
-  debug("\n<< a client diconnected at " + getTimeStamp() + " >>", "yellow", function(){
+  debug("\n<< a client disconnected at " + getTimeStamp() + " >>", "yellow", function(){
     console.log("id: ".yellow, socket.id);
     console.log("ip address: ".yellow, socket.request.connection.remoteAddress);
   });
@@ -238,7 +277,8 @@ socket.on('logServerData', function(){ logServerData(); });
 server.listen(process.env.PORT || 3000, function(){
   console.log("\n------------------------------------");
   console.log('Application server listening on', server.address().port);
-  console.log("------------------------------------");
+  console.log("------------------------------------\n");
+  prompt();
 });
 
 // ---------------------------------------------------------------------------------------
