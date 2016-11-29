@@ -57,7 +57,6 @@ function resetQuestions() {
     res.on('end', function(){
       var apiRes = JSON.parse(body);
       var questionLib = apiRes;
-      console.log("QLIB LENGTH : ", questionLib.length);
       questions = [];
       var gameLengthSetting = 10;
       if (questionLib.length < gameLengthSetting) {
@@ -67,15 +66,11 @@ function resetQuestions() {
           var randInt = Math.floor(Math.random()*questionLib.length);
           var toPush = questionLib.splice(randInt, 1)[0];
           questions.push(toPush);
-          console.log("Adding question: ", i, toPush.q);
         }
       }
-      questionLib.forEach(function(item){
-        console.log("QLIB : ", item.q);
-      });
     });
   }).on('error', function(e){
-      console.log("Got an error: ", e);
+    // Log
   });
 }
 
@@ -92,7 +87,6 @@ var statePusher = {
     var activePlayers = Object.keys(serverData.rooms[room].players);
     switch (serverData.rooms[room].phase) {
       case "start":
-        console.log("CURRENT PHASE", serverData.rooms[room].phase);
         var clientIds = [];
         Object.keys(serverData.clientData).forEach(function(cid){
           if (serverData.clientData[cid].room == room) {
@@ -112,11 +106,9 @@ var statePusher = {
         }
         serverData.rooms[room].currQuestion = questions[serverData.rooms[room].questionIdx];
         serverData.rooms[room].questionIdx++;
-        console.log("SWITCHING PHASE TO QUESTION");
         serverData.rooms[room].phase = "question";
         break;
       case "question":
-        console.log("CURRENT PHASE", serverData.rooms[room].phase);
         var resultCounter = [];
         for (var j = 0; j < serverData.rooms[room].currQuestion.a.length; j++) {
           resultCounter.push(0);
@@ -127,12 +119,9 @@ var statePusher = {
         var majorityIdx = indexOfMax(resultCounter);
         serverData.rooms[room].tiedScoreCounter = 0;
         serverData.rooms[room].topAnswer = serverData.rooms[room].currQuestion.a[majorityIdx];
-        console.log(resultCounter);
         resultCounter.forEach(function(item){
           if (item == resultCounter[majorityIdx]) {
-            console.log("This is the item inside result counter: ", item);
             serverData.rooms[room].tiedScoreCounter++;
-            console.log("Incrementing tied score counter: ", serverData.rooms[room].tiedScoreCounter);
           }
         });
         for (var l = 0; l < activePlayers.length; l++) {
@@ -150,7 +139,6 @@ var statePusher = {
             }
           }
         }
-        console.log("SWITCHING PHASE TO RESULT");
         serverData.rooms[room].phase = "result";
         var interval = setInterval(function() {
           statePusher.next(room);
@@ -262,12 +250,10 @@ var uiManager = {
 // Helpers
 // ---------------------------------------------------------------------------------------
 function saveClient(socket) {
-  console.log("<< new connection >> : ", socket.id);
   serverData.sockets[socket.id] = socket;
 }
 
 function removeClient(socket) {
-  console.log("<< removing client >> : ", socket.id);
   var occupied = serverData.clientData[socket.id];
   if (occupied) {
     if (occupied.room) {
@@ -342,7 +328,6 @@ saveClient(socket);
 socket.on('registerUser', function(data){
   // TODO: Join a room here using data.room
   if (!(serverData.rooms[data.room])) {
-    console.log("Creating game... : ", data.room);
     serverData.rooms[data.room] = createGameState();
   }
   socket.join(data.room);
@@ -353,7 +338,6 @@ socket.on('registerUser', function(data){
   });
   uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
   uiManager.updateUsers(getRoom(socket.id));
-  console.log("Added new room : ", serverData.rooms);
 });
 
 socket.on('disconnect', function(){
@@ -373,12 +357,10 @@ socket.on('printToChat', function(data){
 });
 
 socket.on('nextState', function(){
-  console.log("STATEPUSHER PUSHING ROOM : ", getRoom(socket.id), " for ", socket.id);
   statePusher.next(getRoom(socket.id));
 });
 
 socket.on('submitAnswer', function(data){
-  console.log("Submitted answer : ", data);
   var room = getRoom(socket.id);
   if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
     serverData.rooms[room].players[socket.id].choice = data.answer;

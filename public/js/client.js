@@ -38,7 +38,6 @@ var gameArea = $("#game-area");
 // UI Rendering
 var UI = {
   render: function(data) {
-    console.log("RENDER : ", data);
     switch (data.method) {
       case "update-online-users":
         onlineUsers.empty();
@@ -68,7 +67,6 @@ var UI = {
         var gameState = data.content;
         if (gameState.phase == "start") {
           user.active = true;
-          console.log(user);
           gameArea.empty();
           gameArea.append(domFactory.build.startingDisplay(gameState));
         }
@@ -82,7 +80,6 @@ var UI = {
           });
         }
         if (gameState.phase == "result") {
-          console.log("calling result block... : ", user.name);
           gameArea.empty();
           gameArea.append(domFactory.build.resultDisplay(gameState));
           var counter = parseInt($("#countdown-timer-num").text());
@@ -179,7 +176,6 @@ var domFactory = {
       return $("<div></div>").attr("id", "game-board");
     },
     question: function(data) {
-      console.log("CURR Q DATA: ", data);
       return $("<div></div>").attr("id", "display-question")
         .append(
           $("<div></div>")
@@ -323,7 +319,6 @@ $(window).resize(function () {
 
 // Default User Actions
 var queryVars = $.parseQuery();
-console.log(queryVars);
 if (queryVars.room) {
   $.post("/api/rooms/join", { room: queryVars.room }).done(function(data){
     if (data.exists) {
@@ -495,6 +490,5 @@ function attemptRoomJoin() {
 // Sandbox
 function apiTest() {
   $.get( "api/users", function( data ) {
-    console.log("API CALL [ USERS ] : ", data);
   });
 }
