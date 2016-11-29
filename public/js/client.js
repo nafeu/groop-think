@@ -12,22 +12,6 @@ var COLORS = [
   '#1F618D', '#2874A6', '#148F77', '#117A65',
   '#1E8449', '#239B56', '#B7950B', '#AF601A'
 ];
-var config = {
-  debug: true,
-};
-var queryVars = $.parseQuery();
-if (queryVars.debug === "true") {
-  config.debug = true;
-}
-$('body').keyup(function (event) {
-  if (config.debug) {
-    // "l" pressed
-    if (event.which == 76) {
-      event.preventDefault();
-      socket.emit('logServerData');
-    }
-  }
-});
 
 // ---------------------------------------------------------------------------------------
 $(function(){ // Document Ready - Start

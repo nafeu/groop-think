@@ -21,7 +21,7 @@ var rl = readline.createInterface({
   terminal: false,
 });
 
-if (config.debug) {
+if (process.env.DEBUG === "true") {
   rl.on('line', function(command){
     switch (command) {
       case "h":
@@ -71,11 +71,11 @@ var statePusher = require('./components/state-pusher')(serverData, uiManager, gd
 // Helpers
 // ---------------------------------------------------------------------------------------
 function prompt() {
-  if (config.debug) rl.prompt();
+  if (process.env.DEBUG === "true") rl.prompt();
 }
 
 function debug(msg, color, cb) {
-  if (config.debug || process.env.DEBUG === true) {
+  if (process.env.DEBUG === "true") {
     process.stdout.clearLine();
     if (color) {
       console.log(colors[color](msg));
@@ -220,6 +220,15 @@ socket.on('registerUser', function(data){
       uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
       uiManager.updateUsers(getRoom(socket.id));
     });
+  } else {
+    socket.join(data.room);
+    serverData.clientData[socket.id] = data;
+    socket.emit('render', {
+      method: "game-state",
+      content: serverData.rooms[data.room]
+    });
+    uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
+    uiManager.updateUsers(getRoom(socket.id));
   }
 });
 
@@ -261,9 +270,6 @@ socket.on('submitAnswer', function(data){
     statePusher.next(getRoom(socket.id));
   }
 });
-
-socket.on('logServerData', function(){ logServerData(); });
-
 
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
