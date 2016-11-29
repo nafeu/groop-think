@@ -21,7 +21,6 @@ $(function(){ // Document Ready - Start
 var body = $("#content");
 var login = $("#login");
 var room = $("#room");
-var gameArea = $("#game-area");
 var chat = $("#chat");
 var onlineUsers = $("#online-users");
 var chatBox = $("#chat-box");
@@ -34,6 +33,7 @@ var roomInfoBar = $("#room-info-bar");
 var roomInfoNotice = $("#room-info-notice");
 var roomInfoUrl = $("#room-info-url");
 var roomJoin = $("#room-join-btn");
+var gameArea = $("#game-area");
 
 // UI Rendering
 var UI = {
@@ -42,20 +42,24 @@ var UI = {
     switch (data.method) {
       case "update-online-users":
         onlineUsers.empty();
-        $.each(data.content, function(index, value){
-          var userLabel = $("<span></span>")
-            .css("color", getUsernameColor(value))
-            .text(value);
-          onlineUsers
-            .append(userLabel)
-            .append("<span class='online-user-sep'>, </span>");
-        });
+        if (data.content.length < 7) {
+          $.each(data.content, function(index, value){
+            var userLabel = $("<span></span>")
+              .css("color", getUsernameColor(value))
+              .text(value);
+            onlineUsers
+              .append(userLabel)
+              .append("<span class='online-user-sep'>, </span>");
+          });
+        } else {
+          onlineUsers.text(data.content.length);
+        }
         break;
       case "print-to-chat":
         if (data.content.type == "update")
-          UI.printToChat(domFactory.build.updateMessage(data.content));
+          this.printToChat(domFactory.build.updateMessage(data.content));
         if (data.content.type == "chat")
-          UI.printToChat(domFactory.build.chatMessage(data.content));
+          this.printToChat(domFactory.build.chatMessage(data.content));
         break;
       case "add-class":
         $(data.content.id).addClass(data.content.class);
