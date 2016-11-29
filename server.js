@@ -7,68 +7,51 @@ var io = require('socket.io')(server);
 var msgt = require('./components/msg-tools');
 var config = require('./config.js');
 var gd = require('./components/game-deck');
-io.set('heartbeat timeout', 4000);
-io.set('heartbeat interval', 2000);
+var colors = require('colors');
 
 // ---------------------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------------------
 
+// debugger
+function debug(msg, color) {
+  if (config.debug)
+    if (color)
+      console.log(colors[color](msg));
+    else
+      console.log(msg);
+}
+
+// socket.io configs
+io.set('heartbeat timeout', 4000);
+io.set('heartbeat interval', 2000);
+
+// Express server configs
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
-var questions = [];
-
-function resetQuestions() {
-  var url = "http://phrakture.com/apps/mrsubmission/data/questions.json";
-  http.get(url, function(res){
-    var body = '';
-    res.on('data', function(chunk){
-      body += chunk;
-    });
-    res.on('end', function(){
-      var apiRes = JSON.parse(body);
-      var questionLib = apiRes;
-      questions = [];
-      var gameLengthSetting = 10;
-      if (questionLib.length < gameLengthSetting) {
-        questions = questionLib;
-      } else {
-        for (var i = 0; i < gameLengthSetting; i++) {
-          var randInt = Math.floor(Math.random()*questionLib.length);
-          var toPush = questionLib.splice(randInt, 1)[0];
-          questions.push(toPush);
-        }
-      }
-    });
-  }).on('error', function(e){
-    // Log
-  });
-}
-
-resetQuestions();
-
+// Server state data (stored in memory)
 var serverData = {
   sockets: {},
   clientData: {},
   rooms: {}
 };
-
 var uiManager = require('./components/ui-manager')(serverData, io);
 var statePusher = require('./components/state-pusher')(serverData, uiManager, gd);
-
 
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
 function saveClient(socket) {
+  debug("<< a new client connected at " + new Date().toString() + " | id : " + socket.id + " >>", "green");
   serverData.sockets[socket.id] = socket;
 }
 
 function removeClient(socket) {
+  debug("<< a client disconnected at " + new Date().toString() + " | id : " + socket.id + " >>", "yellow");
   var occupied = serverData.clientData[socket.id];
   if (occupied) {
     if (occupied.room) {
@@ -96,24 +79,10 @@ function getRoom(sid) {
   return serverData.clientData[sid].room;
 }
 
-function createGameState(cards, len) {
-  return {
-    "phase": "start",
-    "gameLength": len,
-    "currQuestion": {},
-    "numActive": 0,
-    "numAnswers": 0,
-    "topAnswer": null,
-    "tiedScoreCounter": 0,
-    "winner": null,
-    "players": {},
-    "deck": cards
-  };
-}
-
 function generateUID() {
     return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4);
 }
+
 
 // ---------------------------------------------------------------------------------------
 io.on('connection', function(socket){ // IO Socket Connection Start
@@ -129,7 +98,7 @@ socket.on('registerUser', function(data){
   // TODO: Join a room here using data.room
   if (!(serverData.rooms[data.room])) {
     gd.fetchCards(function(cards, err){
-      serverData.rooms[data.room] = createGameState(cards, 3);
+      serverData.rooms[data.room] = statePusher.createGameState(cards, 3);
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
       socket.emit('render', {
@@ -164,18 +133,19 @@ socket.on('nextState', function(){
 
 socket.on('submitAnswer', function(data){
   var room = getRoom(socket.id);
-  if (serverData.rooms[room].players[socket.id] && (serverData.rooms[room].players[socket.id].choice === null)) {
-    serverData.rooms[room].players[socket.id].choice = data.answer;
-    serverData.rooms[room].numAnswers++;
+  var currRoom = serverData.rooms[room];
+  if (currRoom.players[socket.id] && (currRoom.players[socket.id].choice === null)) {
+    currRoom.players[socket.id].choice = data.answer;
+    currRoom.numAnswers++;
     io.sockets.to(room).emit('render', {
       method: "add-class",
       content: {
-        "id": "#userId-"+serverData.rooms[room].players[socket.id].name,
+        "id": "#userId-"+currRoom.players[socket.id].name,
         "class": "submittedAnswer"
       }
     });
   }
-  if (serverData.rooms[room].numAnswers >= serverData.rooms[room].numActive) {
+  if (currRoom.numAnswers >= currRoom.numActive) {
     statePusher.next(getRoom(socket.id));
   }
 });

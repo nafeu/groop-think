@@ -91,6 +91,20 @@ module.exports = function(serverData, uiManager, gd) {
           break;
       }
       uiManager.renderState(room);
+    },
+    createGameState: function(cards, len) {
+      return {
+        "phase": "start",
+        "gameLength": len,
+        "currQuestion": {},
+        "numActive": 0,
+        "numAnswers": 0,
+        "topAnswer": null,
+        "tiedScoreCounter": 0,
+        "winner": null,
+        "players": {},
+        "deck": cards
+      };
     }
   };
 };
