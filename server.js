@@ -138,7 +138,12 @@ function logServerData() {
 
 function logCardsDB() {
   gd.fetchCards(function(cards){
-    debug(JSON.stringify(cards, null, 2));
+    debug("Fetching cards...", "blue", function(){
+      cards.forEach(function(card){
+        console.log(card.q);
+      });
+      console.log("Total: ".blue + " " + cards.length);
+    });
   });
 }
 
