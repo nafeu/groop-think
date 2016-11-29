@@ -14,13 +14,41 @@ var colors = require('colors');
 // ---------------------------------------------------------------------------------------
 
 // debugger
-function debug(msg, color) {
-  if (config.debug) {
-    if (color)
+function debug(msg, color, cb) {
+  if (config.debug || process.env.DEBUG === true) {
+    if (color) {
       console.log(colors[color](msg));
-    else
+      if (cb) cb();
+    }
+    else {
       console.log(msg);
+      if (cb) cb();
+    }
   }
+}
+
+function getTimeStamp() {
+
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var ampm = "AM";
+
+  if (hours > 12) {
+    hours -= 12;
+    ampm = "PM";
+  }
+
+  if (minutes < 10) {
+    minutes = "0"+minutes;
+  }
+
+  if (seconds < 10) {
+    seconds = "0"+seconds;
+  }
+
+  return hours + ":" + minutes + ":" + seconds + " " + ampm;
 }
 
 // socket.io configs
@@ -46,13 +74,58 @@ var statePusher = require('./components/state-pusher')(serverData, uiManager, gd
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
+function logServerData() {
+  debug("\n[ Server Data - ".bold + getTimeStamp().bold + " ]".bold, "blue", function(){
+    console.log("Clients:".underline);
+    console.log("  active: ".blue + "("+ Object.keys(serverData.sockets).length +")");
+    Object.keys(serverData.sockets).forEach(function(item){
+      console.log("    "+item);
+    });
+    console.log("  registered:".blue, Object.keys(serverData.clientData).length);
+    console.log("Rooms:".underline);
+    console.log("  active: ".blue + "("+ Object.keys(serverData.rooms).length +")\n");
+    Object.keys(serverData.rooms).forEach(function(room){
+      console.log("  --[ "+room.bold+" ]--");
+      var roomData = JSON.stringify(
+        Object.assign(
+          {},
+          serverData.rooms[room],
+          {
+            deck: serverData.rooms[room].deck.length,
+            currQuestion: shortenQuestion(serverData.rooms[room].currQuestion.q)
+          }),
+        null,
+        2);
+      roomData = roomData.replace(/"|{|}|,/g,'').replace(/^\s*[\r\n]/gm, '');
+      console.log(roomData);
+    });
+  });
+}
+
+function shortenQuestion(q) {
+  if (q) {
+    if (q.length > 40)
+      return "< " + q.substring(0, 40) + "... >";
+    return "< " + q + " >";
+  } else {
+    return "null";
+  }
+}
+
 function saveClient(socket) {
-  debug("<< a new client connected at " + new Date().toString() + " | id : " + socket.id + " >>", "green");
+  debug("\n<< new client connected at " + getTimeStamp() + " >>", "green", function(){
+    console.log("id: ".green, socket.id);
+    console.log("ip address: ".green, socket.request.connection.remoteAddress);
+  });
   serverData.sockets[socket.id] = socket;
+  logServerData();
 }
 
 function removeClient(socket) {
-  debug("<< a client disconnected at " + new Date().toString() + " | id : " + socket.id + " >>", "yellow");
+  debug("\n<< a client diconnected at " + getTimeStamp() + " >>", "yellow", function(){
+    console.log("id: ".yellow, socket.id);
+    console.log("ip address: ".yellow, socket.request.connection.remoteAddress);
+  });
   var occupied = serverData.clientData[socket.id];
   if (occupied) {
     if (occupied.room) {
@@ -98,7 +171,7 @@ saveClient(socket);
 socket.on('registerUser', function(data){
   if (!(serverData.rooms[data.room])) {
     gd.fetchCards(function(cards, err){
-      serverData.rooms[data.room] = statePusher.createGameState(cards, 3);
+      serverData.rooms[data.room] = statePusher.createGameState(cards.slice(0), 3);
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
       socket.emit('render', {
@@ -150,6 +223,8 @@ socket.on('submitAnswer', function(data){
   }
 });
 
+socket.on('logServerData', function(){ logServerData(); });
+
 
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
@@ -163,7 +238,7 @@ socket.on('submitAnswer', function(data){
 server.listen(process.env.PORT || 3000, function(){
   console.log("\n------------------------------------");
   console.log('Application server listening on', server.address().port);
-  console.log("------------------------------------\n");
+  console.log("------------------------------------");
 });
 
 // ---------------------------------------------------------------------------------------
