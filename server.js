@@ -15,11 +15,12 @@ var colors = require('colors');
 
 // debugger
 function debug(msg, color) {
-  if (config.debug)
+  if (config.debug) {
     if (color)
       console.log(colors[color](msg));
     else
       console.log(msg);
+  }
 }
 
 // socket.io configs
@@ -95,7 +96,6 @@ saveClient(socket);
 // Event Handlers
 // ---------------------------------------------------------------------------------------
 socket.on('registerUser', function(data){
-  // TODO: Join a room here using data.room
   if (!(serverData.rooms[data.room])) {
     gd.fetchCards(function(cards, err){
       serverData.rooms[data.room] = statePusher.createGameState(cards, 3);
@@ -161,7 +161,9 @@ socket.on('submitAnswer', function(data){
 // Server Config
 // ---------------------------------------------------------------------------------------
 server.listen(process.env.PORT || 3000, function(){
-  console.log('listening on', server.address().port);
+  console.log("\n------------------------------------");
+  console.log('Application server listening on', server.address().port);
+  console.log("------------------------------------\n");
 });
 
 // ---------------------------------------------------------------------------------------
