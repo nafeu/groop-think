@@ -75,8 +75,8 @@ function prompt() {
 }
 
 function debug(msg, color, cb) {
-  process.stdout.clearLine();
   if (config.debug || process.env.DEBUG === true) {
+    process.stdout.clearLine();
     if (color) {
       console.log(colors[color](msg));
       if (cb) cb();
