@@ -88,12 +88,17 @@ socket.on('registerUser', function(data){
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
       serverData.rooms[data.room].numActive = 1;
+      serverData.rooms[data.room].hostId = socket.id;
       socket.emit('render', {
         method: "game-state",
         content: serverData.rooms[data.room]
       });
-      uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
-      uiManager.updateUsers(getRoom(socket.id));
+      roomRef = getRoom(socket.id);
+      uiManager.printToChat(roomRef, { type: "update", text: data.name + " has connected!"});
+      uiManager.updateUsers(roomRef);
+    });
+    debug.log("\n<< new room created with id ".green + data.room + " >>".green, function(){
+      logRoomData(data.room);
     });
   } else {
     socket.join(data.room);
@@ -105,6 +110,9 @@ socket.on('registerUser', function(data){
     });
     uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
     uiManager.updateUsers(getRoom(socket.id));
+    debug.log("<< user ".green + socket.id + " joined room ".green + data.room + " >>".green, function(){
+      logRoomData(data.room);
+    });
   }
 });
 
@@ -247,21 +255,9 @@ function logServerData() {
     });
     console.log("  registered:".blue, Object.keys(serverData.clientData).length);
     console.log("Rooms:".underline);
-    console.log("  active: ".blue + "("+ Object.keys(serverData.rooms).length +")\n");
+    console.log("  active: ".blue + "("+ Object.keys(serverData.rooms).length +")");
     Object.keys(serverData.rooms).forEach(function(room){
-      console.log("  --[ "+room.bold+" ]--");
-      var roomData = JSON.stringify(
-        Object.assign(
-          {},
-          serverData.rooms[room],
-          {
-            deck: serverData.rooms[room].deck.length,
-            currQuestion: shortenQuestion(serverData.rooms[room].currQuestion.q)
-          }),
-        null,
-        2);
-      roomData = roomData.replace(/"|{|}|,/g,'').replace(/^\s*[\r\n]/gm, '');
-      console.log(roomData);
+      logRoomData(room);
     });
   });
 }
@@ -275,6 +271,25 @@ function logCardsDB() {
       console.log("Total: ".blue + " " + cards.length);
     });
   });
+}
+
+function logRoomData(room) {
+  if (serverData.rooms[room]) {
+    console.log("\n  --[ ".blue+room.bold+" ]--".blue);
+    console.log(JSON.stringify(
+      Object.assign(
+        {},
+        serverData.rooms[room],
+        {
+          deck: serverData.rooms[room].deck.length,
+          currQuestion: shortenQuestion(serverData.rooms[room].currQuestion.q)
+        }),
+      null,
+      2).replace(/"|{|}|,/g,'')
+      .replace(/^\s*[\r\n]/gm, ''));
+  } else {
+    console.log(room + " does not exist.");
+  }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -337,6 +352,7 @@ function removeClient(socket) {
         serverData.rooms[occupied.room].numAnswers--;
         // TODO: Delete the user as well
         if (serverData.rooms[occupied.room].numActive === 0) {
+          debug.log("\n<< deleting empty room ".red + occupied.room + " >>".red);
           delete serverData.rooms[occupied.room];
         }
       }

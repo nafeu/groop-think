@@ -94,6 +94,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
     },
     createGameState: function(cards, len) {
       return {
+        "hostId": null,
         "phase": "start",
         "gameLength": len,
         "currQuestion": {},
