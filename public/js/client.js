@@ -68,13 +68,13 @@ $(window).resize(function () {
 var queryVars = $.parseQuery();
 if (queryVars.room) {
   $.post("/api/rooms/join", { room: queryVars.room }).done(function(data){
-    if (data.exists) {
+    if (data.joinable) {
       user.room = queryVars.room;
       showRegistration();
     } else {
       UI.displayRoomWarn({
         color: "purple",
-        message: 'Room "' + queryVars.room + '" does not exist, please enter a correct room id.'
+        message: 'Room "' + queryVars.room + '" ' + data.message
       });
       room.show();
     }

@@ -20,6 +20,7 @@ var serverData = {
   rooms: {}
 };
 var rl, uiManager, statePusher;
+var roomSize = 3;
 
 // Debug Tool Configs
 if (process.env.DEBUG === "true") {
@@ -74,93 +75,11 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
 // ---------------------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------------------
-
-function getTimeStamp() {
-  var now = new Date();
-  var hours = now.getHours();
-  var minutes = now.getMinutes();
-  var seconds = now.getSeconds();
-  var ampm = "AM";
-  if (hours > 12) {
-    hours -= 12;
-    ampm = "PM";
-  }
-  if (minutes < 10) {
-    minutes = "0"+minutes;
-  }
-  if (seconds < 10) {
-    seconds = "0"+seconds;
-  }
-  return hours + ":" + minutes + ":" + seconds + " " + ampm;
-}
-
-function shortenQuestion(q) {
-  if (q) {
-    if (q.length > 40)
-      return "< " + q.substring(0, 40) + "... >";
-    return "< " + q + " >";
-  } else {
-    return "null";
-  }
-}
-
-function saveClient(socket) {
-  debug.log("\n<< new client connected at ".green + getTimeStamp().green + " >>".green, function(){
-    console.log("id: ".green, socket.id);
-    console.log("ip address: ".green, socket.request.connection.remoteAddress);
-  });
-  serverData.sockets[socket.id] = socket;
-}
-
-function removeClient(socket) {
-  debug.log("\n<< a client disconnected at ".yellow + getTimeStamp().yellow + " >>".yellow, function(){
-    console.log("id: ".yellow, socket.id);
-    console.log("ip address: ".yellow, socket.request.connection.remoteAddress);
-  });
-  var occupied = serverData.clientData[socket.id];
-  if (occupied) {
-    if (occupied.room) {
-      if (serverData.rooms[occupied.room]) {
-        if (
-            (serverData.rooms[occupied.room].numAnswers >= serverData.rooms[occupied.room].numActive) &&
-            (serverData.rooms[occupied.room].phase == "question")) {
-          statePusher.next(occupied.room);
-        }
-        delete serverData.rooms[occupied.room].players[socket.id];
-        serverData.rooms[occupied.room].numActive--;
-        serverData.rooms[occupied.room].numAnswers--;
-        // TODO: Delete the user as well
-        if (serverData.rooms[occupied.room].numActive === 0) {
-          delete serverData.rooms[occupied.room];
-        }
-      }
-    }
-  }
-  delete serverData.sockets[socket.id];
-  delete serverData.clientData[socket.id];
-}
-
-function getRoom(sid) {
-  return serverData.clientData[sid].room;
-}
-
-function generateUID() {
-    return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4);
-}
-
-
-// ---------------------------------------------------------------------------------------
 io.on('connection', function(socket){ // IO Socket Connection Start
 // ---------------------------------------------------------------------------------------
 
 // On User Connect, SAVE, PERSIST, NOTIFY
 saveClient(socket);
-
-// ---------------------------------------------------------------------------------------
-// Event Handlers
-// ---------------------------------------------------------------------------------------
 
 socket.on('registerUser', function(data){
   if (!(serverData.rooms[data.room])) {
@@ -168,6 +87,7 @@ socket.on('registerUser', function(data){
       serverData.rooms[data.room] = statePusher.createGameState(cards.slice(0), 3);
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
+      serverData.rooms[data.room].numActive = 1;
       socket.emit('render', {
         method: "game-state",
         content: serverData.rooms[data.room]
@@ -178,6 +98,7 @@ socket.on('registerUser', function(data){
   } else {
     socket.join(data.room);
     serverData.clientData[socket.id] = data;
+    serverData.rooms[data.room].numActive++;
     socket.emit('render', {
       method: "game-state",
       content: serverData.rooms[data.room]
@@ -289,12 +210,27 @@ app.get('/api/rooms/create', function(req, res) {
 });
 
 app.post('/api/rooms/join', function(req, res) {
-  var exists = false;
+  var joinable = false;
+  var message = "";
   if (serverData.rooms[req.body.room]) {
-    exists = true;
+    var room = serverData.rooms[req.body.room];
+    // console.log(room);
+    if (room.phase != "start") {
+      message = "is already in a game, please try later.";
+    }
+    else if (Object.keys(room.players).length == roomSize)
+    {
+      message = "is full, please try a different room.";
+    }
+    else {
+      joinable = true;
+    }
+  } else {
+    message = "does not exist, please enter an existing room id.";
   }
   res.json({
-    exists: exists
+    joinable: joinable,
+    message: message
   });
 });
 
@@ -341,3 +277,79 @@ function logCardsDB() {
   });
 }
 
+// ---------------------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------------------
+
+function getTimeStamp() {
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var ampm = "AM";
+  if (hours > 12) {
+    hours -= 12;
+    ampm = "PM";
+  }
+  if (minutes < 10) {
+    minutes = "0"+minutes;
+  }
+  if (seconds < 10) {
+    seconds = "0"+seconds;
+  }
+  return hours + ":" + minutes + ":" + seconds + " " + ampm;
+}
+
+function shortenQuestion(q) {
+  if (q) {
+    if (q.length > 40)
+      return "< " + q.substring(0, 40) + "... >";
+    return "< " + q + " >";
+  } else {
+    return "null";
+  }
+}
+
+function saveClient(socket) {
+  debug.log("\n<< new client connected at ".green + getTimeStamp().green + " >>".green, function(){
+    console.log("id: ".green, socket.id);
+    console.log("ip address: ".green, socket.request.connection.remoteAddress);
+  });
+  serverData.sockets[socket.id] = socket;
+}
+
+function removeClient(socket) {
+  debug.log("\n<< a client disconnected at ".yellow + getTimeStamp().yellow + " >>".yellow, function(){
+    console.log("id: ".yellow, socket.id);
+    console.log("ip address: ".yellow, socket.request.connection.remoteAddress);
+  });
+  var occupied = serverData.clientData[socket.id];
+  if (occupied) {
+    if (occupied.room) {
+      if (serverData.rooms[occupied.room]) {
+        if (
+            (serverData.rooms[occupied.room].numAnswers >= serverData.rooms[occupied.room].numActive) &&
+            (serverData.rooms[occupied.room].phase == "question")) {
+          statePusher.next(occupied.room);
+        }
+        delete serverData.rooms[occupied.room].players[socket.id];
+        serverData.rooms[occupied.room].numActive--;
+        serverData.rooms[occupied.room].numAnswers--;
+        // TODO: Delete the user as well
+        if (serverData.rooms[occupied.room].numActive === 0) {
+          delete serverData.rooms[occupied.room];
+        }
+      }
+    }
+  }
+  delete serverData.sockets[socket.id];
+  delete serverData.clientData[socket.id];
+}
+
+function getRoom(sid) {
+  return serverData.clientData[sid].room;
+}
+
+function generateUID() {
+    return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4);
+}
