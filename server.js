@@ -108,9 +108,9 @@ socket.on('registerUser', function(data){
       roomRef = getRoom(socket.id);
       uiManager.printToChat(roomRef, { type: "update", text: data.name + " has connected!"});
       uiManager.updateUsers(roomRef);
-    });
-    debug.log("\n<< new room created with id ".green + data.room + " >>".green, function(){
-      logRoomData(data.room);
+      debug.log("\n<< new room created with id ".green + data.room + " >>".green, function(){
+        logRoomData(data.room);
+      });
     });
   } else {
     socket.join(data.room);
