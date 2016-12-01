@@ -34,9 +34,9 @@ if (process.env.DEBUG === "true") {
       case "h":
       case "help":
         debug.log(
-          "sd, server data --- display server data\n"+
+          "sd, server data --- display all server data\n"+
           "fc, fetch cards --- display available cards from DB\n"+
-          "client [id] --- display client info\n"
+          "r, rooms --- display all rooms\n"
         );
         break;
       case "sd":
@@ -46,6 +46,18 @@ if (process.env.DEBUG === "true") {
       case "fc":
       case "fetch cards":
         logCardsDB();
+        break;
+      case "r":
+      case "rooms":
+        if (Object.keys(serverData.rooms).length > 0) {
+          debug.log("active: ".blue + Object.keys(serverData.rooms).length, function(){
+            Object.keys(serverData.rooms).forEach(function(room){
+              logRoomData(room);
+            });
+          });
+        } else {
+          debug.log("There are currently no active rooms.");
+        }
         break;
       case "clear":
         process.stdout.write("\u001b[2J\u001b[0;0H");

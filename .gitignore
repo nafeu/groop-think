@@ -2,3 +2,4 @@
 /bower_components
 bower.json
 .DS_store
+config.js
