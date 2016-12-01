@@ -4,9 +4,8 @@ var http = require('http');
 var server = require('http').Server(app);
 var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
-var msgt = require('./components/msg-tools');
 var config = require('./config.js');
-var gd = require('./components/game-deck');
+var gameDeck = require('./components/game-deck');
 var colors = require('colors');
 var readline = require('readline');
 
@@ -61,7 +60,7 @@ if (process.env.DEBUG === "true") {
 // Module Configs
 debug = require('./components/debug-tools')(rl);
 uiManager = require('./components/ui-manager')(serverData, io, debug);
-statePusher = require('./components/state-pusher')(serverData, uiManager, gd, debug);
+statePusher = require('./components/state-pusher')(serverData, uiManager, gameDeck, debug);
 
 // Socket.io configs
 io.set('heartbeat timeout', 4000);
@@ -95,45 +94,6 @@ function getTimeStamp() {
     seconds = "0"+seconds;
   }
   return hours + ":" + minutes + ":" + seconds + " " + ampm;
-}
-
-function logServerData() {
-  debug.log("\n[ Server Data - ".bold.blue + getTimeStamp().bold.blue + " ]".bold.blue, function(){
-    console.log("Clients:".underline);
-    console.log("  active: ".blue + "("+ Object.keys(serverData.sockets).length +")");
-    Object.keys(serverData.sockets).forEach(function(item){
-      console.log("    "+item);
-    });
-    console.log("  registered:".blue, Object.keys(serverData.clientData).length);
-    console.log("Rooms:".underline);
-    console.log("  active: ".blue + "("+ Object.keys(serverData.rooms).length +")\n");
-    Object.keys(serverData.rooms).forEach(function(room){
-      console.log("  --[ "+room.bold+" ]--");
-      var roomData = JSON.stringify(
-        Object.assign(
-          {},
-          serverData.rooms[room],
-          {
-            deck: serverData.rooms[room].deck.length,
-            currQuestion: shortenQuestion(serverData.rooms[room].currQuestion.q)
-          }),
-        null,
-        2);
-      roomData = roomData.replace(/"|{|}|,/g,'').replace(/^\s*[\r\n]/gm, '');
-      console.log(roomData);
-    });
-  });
-}
-
-function logCardsDB() {
-  gd.fetchCards(function(cards){
-    debug.log("Fetching cards...".blue, function(){
-      cards.forEach(function(card){
-        console.log(card.q);
-      });
-      console.log("Total: ".blue + " " + cards.length);
-    });
-  });
 }
 
 function shortenQuestion(q) {
@@ -204,7 +164,7 @@ saveClient(socket);
 
 socket.on('registerUser', function(data){
   if (!(serverData.rooms[data.room])) {
-    gd.fetchCards(function(cards, err){
+    gameDeck.fetchCards(function(cards, err){
       serverData.rooms[data.room] = statePusher.createGameState(cards.slice(0), 3);
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
@@ -282,10 +242,6 @@ server.listen(process.env.PORT || 3000, function(){
 // Data API
 // ---------------------------------------------------------------------------------------
 
-app.get('/api/users', function(req, res) {
-  res.json(serverData.clientData);
-});
-
 app.post('/api/users/validate', function(req, res){
 
   var name = req.body.name;
@@ -341,3 +297,47 @@ app.post('/api/rooms/join', function(req, res) {
     exists: exists
   });
 });
+
+// ---------------------------------------------------------------------------------------
+// Debug Logging
+// ---------------------------------------------------------------------------------------
+
+function logServerData() {
+  debug.log("\n[ Server Data - ".bold.blue + getTimeStamp().bold.blue + " ]".bold.blue, function(){
+    console.log("Clients:".underline);
+    console.log("  active: ".blue + "("+ Object.keys(serverData.sockets).length +")");
+    Object.keys(serverData.sockets).forEach(function(item){
+      console.log("    "+item);
+    });
+    console.log("  registered:".blue, Object.keys(serverData.clientData).length);
+    console.log("Rooms:".underline);
+    console.log("  active: ".blue + "("+ Object.keys(serverData.rooms).length +")\n");
+    Object.keys(serverData.rooms).forEach(function(room){
+      console.log("  --[ "+room.bold+" ]--");
+      var roomData = JSON.stringify(
+        Object.assign(
+          {},
+          serverData.rooms[room],
+          {
+            deck: serverData.rooms[room].deck.length,
+            currQuestion: shortenQuestion(serverData.rooms[room].currQuestion.q)
+          }),
+        null,
+        2);
+      roomData = roomData.replace(/"|{|}|,/g,'').replace(/^\s*[\r\n]/gm, '');
+      console.log(roomData);
+    });
+  });
+}
+
+function logCardsDB() {
+  gameDeck.fetchCards(function(cards){
+    debug.log("Fetching cards...".blue, function(){
+      cards.forEach(function(card){
+        console.log(card.q);
+      });
+      console.log("Total: ".blue + " " + cards.length);
+    });
+  });
+}
+

@@ -1,6 +1,6 @@
 var msgt = require('./msg-tools');
 
-module.exports = function(serverData, uiManager, gd, debug) {
+module.exports = function(serverData, uiManager, gameDeck, debug) {
   return {
     next: function(room) {
       var self = this;
@@ -25,7 +25,7 @@ module.exports = function(serverData, uiManager, gd, debug) {
             };
             currRoom.players[clientIds[i]] = playerObj;
           }
-          currRoom.currQuestion = gd.drawCard(currRoom.deck);
+          currRoom.currQuestion = gameDeck.drawCard(currRoom.deck);
           currRoom.gameLength--;
           currRoom.phase = "question";
           break;
@@ -68,7 +68,7 @@ module.exports = function(serverData, uiManager, gd, debug) {
           break;
         case "result":
           if (currRoom.gameLength > 0) {
-            currRoom.currQuestion = gd.drawCard(currRoom.deck);
+            currRoom.currQuestion = gameDeck.drawCard(currRoom.deck);
             currRoom.gameLength--;
             for (var m = 0; m < activePlayers.length; m++) {
               currRoom.players[activePlayers[m]].choice = null;
