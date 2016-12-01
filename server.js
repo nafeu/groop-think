@@ -108,7 +108,7 @@ socket.on('registerUser', function(data){
       roomRef = getRoom(socket.id);
       uiManager.printToChat(roomRef, { type: "update", text: data.name + " has connected!"});
       uiManager.updateUsers(roomRef);
-      debug.log("\n<< new room created with id ".green + data.room + " >>".green, function(){
+      debug.log("\n<< new room created with id ".green + data.room + " at ".green + getTimeStamp().green + ">>".green, function(){
         logRoomData(data.room);
       });
     });
@@ -122,7 +122,7 @@ socket.on('registerUser', function(data){
     });
     uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
     uiManager.updateUsers(getRoom(socket.id));
-    debug.log("<< user ".green + socket.id + " joined room ".green + data.room + " >>".green, function(){
+    debug.log("<< user ".green + socket.id + " joined room ".green + data.room + " at ".green + getTimeStamp().green + ">>".green, function(){
       logRoomData(data.room);
     });
   }
@@ -364,7 +364,7 @@ function removeClient(socket) {
         serverData.rooms[occupied.room].numAnswers--;
         // TODO: Delete the user as well
         if (serverData.rooms[occupied.room].numActive === 0) {
-          debug.log("\n<< deleting empty room ".red + occupied.room + " >>".red);
+          debug.log("\n<< deleting empty room ".red + occupied.room + " at ".red + getTimeStamp().red + ">>".red);
           delete serverData.rooms[occupied.room];
         }
       }
