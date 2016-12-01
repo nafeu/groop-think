@@ -1,6 +1,6 @@
 var msgt = require('./msg-tools');
 
-module.exports = function(serverData, uiManager, gd) {
+module.exports = function(serverData, uiManager, gd, debug) {
   return {
     next: function(room) {
       var self = this;

@@ -1,4 +1,4 @@
-module.exports = function(serverData, io){
+module.exports = function(serverData, io, debug){
   return {
     updateUsers: function(room) {
       var onlineUsers = [];

@@ -14,19 +14,26 @@ var readline = require('readline');
 // Configuration
 // ---------------------------------------------------------------------------------------
 
-// debugger
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false,
-});
+// Globals
+var serverData = {
+  sockets: {},
+  clientData: {},
+  rooms: {}
+};
+var rl, uiManager, statePusher;
 
+// Debug Tool Configs
 if (process.env.DEBUG === "true") {
+  rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false,
+  });
   rl.on('line', function(command){
     switch (command) {
       case "h":
       case "help":
-        debug(
+        debug.log(
           "sd, server data --- display server data\n"+
           "fc, fetch cards --- display available cards from DB\n"+
           "client [id] --- display client info\n"
@@ -40,14 +47,23 @@ if (process.env.DEBUG === "true") {
       case "fetch cards":
         logCardsDB();
         break;
+      case "clear":
+        process.stdout.write("\u001b[2J\u001b[0;0H");
+        debug.prompt();
+        break;
       default:
-        debug("Error: unrecognized command '"+command+"', try 'help' for a list of commands.");
+        debug.log("Error: unrecognized command '"+command+"', try 'help' for a list of commands.");
         break;
     }
   });
 }
 
-// socket.io configs
+// Module Configs
+debug = require('./components/debug-tools')(rl);
+uiManager = require('./components/ui-manager')(serverData, io, debug);
+statePusher = require('./components/state-pusher')(serverData, uiManager, gd, debug);
+
+// Socket.io configs
 io.set('heartbeat timeout', 4000);
 io.set('heartbeat interval', 2000);
 
@@ -58,36 +74,9 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
-// Server state data (stored in memory)
-var serverData = {
-  sockets: {},
-  clientData: {},
-  rooms: {}
-};
-var uiManager = require('./components/ui-manager')(serverData, io);
-var statePusher = require('./components/state-pusher')(serverData, uiManager, gd);
-
 // ---------------------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------------------
-function prompt() {
-  if (process.env.DEBUG === "true") rl.prompt();
-}
-
-function debug(msg, color, cb) {
-  if (process.env.DEBUG === "true") {
-    process.stdout.clearLine();
-    if (color) {
-      console.log(colors[color](msg));
-      if (cb) cb();
-    }
-    else {
-      console.log(msg);
-      if (cb) cb();
-    }
-  }
-  prompt();
-}
 
 function getTimeStamp() {
   var now = new Date();
@@ -109,7 +98,7 @@ function getTimeStamp() {
 }
 
 function logServerData() {
-  debug("\n[ Server Data - ".bold + getTimeStamp().bold + " ]".bold, "blue", function(){
+  debug.log("\n[ Server Data - ".bold.blue + getTimeStamp().bold.blue + " ]".bold.blue, function(){
     console.log("Clients:".underline);
     console.log("  active: ".blue + "("+ Object.keys(serverData.sockets).length +")");
     Object.keys(serverData.sockets).forEach(function(item){
@@ -138,7 +127,7 @@ function logServerData() {
 
 function logCardsDB() {
   gd.fetchCards(function(cards){
-    debug("Fetching cards...", "blue", function(){
+    debug.log("Fetching cards...".blue, function(){
       cards.forEach(function(card){
         console.log(card.q);
       });
@@ -158,7 +147,7 @@ function shortenQuestion(q) {
 }
 
 function saveClient(socket) {
-  debug("\n<< new client connected at " + getTimeStamp() + " >>", "green", function(){
+  debug.log("\n<< new client connected at ".green + getTimeStamp().green + " >>".green, function(){
     console.log("id: ".green, socket.id);
     console.log("ip address: ".green, socket.request.connection.remoteAddress);
   });
@@ -166,7 +155,7 @@ function saveClient(socket) {
 }
 
 function removeClient(socket) {
-  debug("\n<< a client disconnected at " + getTimeStamp() + " >>", "yellow", function(){
+  debug.log("\n<< a client disconnected at ".yellow + getTimeStamp().yellow + " >>".yellow, function(){
     console.log("id: ".yellow, socket.id);
     console.log("ip address: ".yellow, socket.request.connection.remoteAddress);
   });
@@ -212,6 +201,7 @@ saveClient(socket);
 // ---------------------------------------------------------------------------------------
 // Event Handlers
 // ---------------------------------------------------------------------------------------
+
 socket.on('registerUser', function(data){
   if (!(serverData.rooms[data.room])) {
     gd.fetchCards(function(cards, err){
@@ -280,14 +270,12 @@ socket.on('submitAnswer', function(data){
 }); // IO Socket Connection End
 // ---------------------------------------------------------------------------------------
 
-
-
 // ---------------------------------------------------------------------------------------
 // Server Config
 // ---------------------------------------------------------------------------------------
 server.listen(process.env.PORT || 3000, function(){
   console.log('<< Application server listening on '.blue.bold + server.address().port + ' >>'.blue.bold);
-  prompt();
+  debug.prompt();
 });
 
 // ---------------------------------------------------------------------------------------
