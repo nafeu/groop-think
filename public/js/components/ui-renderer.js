@@ -29,6 +29,10 @@ UI = {
       case "add-class":
         $(data.content.id).addClass(data.content.class);
         break;
+      case "disconnect":
+        gameArea.empty();
+        gameArea.append(domFactory.build.disconnectDisplay());
+        break;
       case "game-state":
         var gameState = data.content;
         if (gameState.phase == "start") {
