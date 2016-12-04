@@ -129,14 +129,21 @@ socket.on('registerUser', function(data){
 });
 
 socket.on('disconnect', function(){
-  var user = serverData.clientData[socket.id];
+  var user = Object.assign({}, serverData.clientData[socket.id]);
   removeClient(socket);
-  if (user) {
-    uiManager.printToChat({
+  if (user.room) {
+    uiManager.printToChat(roomRef, {
       type: "update",
       text: user.name + " has disconnected!"
     });
-    uiManager.updateUsers(user.room);
+    if (serverData.rooms[user.room]) {
+      var index = serverData.rooms[user.room].typing.indexOf(user.name);
+      if (index >= 0) serverData.rooms[user.room].typing.splice(index, 1);
+      io.sockets.to(user.room).emit('usersTyping',
+        { typing: serverData.rooms[user.room].typing }
+      );
+      uiManager.updateUsers(user.room);
+    }
   }
 });
 
@@ -377,8 +384,10 @@ function removeClient(socket) {
           statePusher.next(occupied.room);
         }
         delete serverData.rooms[occupied.room].players[socket.id];
-        serverData.rooms[occupied.room].numActive--;
-        serverData.rooms[occupied.room].numAnswers--;
+        if (serverData.rooms[occupied.room].numActive > 0)
+          serverData.rooms[occupied.room].numActive--;
+        if (serverData.rooms[occupied.room].numAnswers > 0);
+          serverData.rooms[occupied.room].numAnswers--;
         // TODO: Delete the user as well
         if (serverData.rooms[occupied.room].numActive === 0) {
           debug.log("\n<< deleting empty room ".red + occupied.room + " at ".red + getTimeStamp().red + ">>".red);
