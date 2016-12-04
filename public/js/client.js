@@ -9,7 +9,8 @@ var user = {
   name: "",
   room: "",
   active: false,
-  isTyping: false
+  isTyping: false,
+  isHost: false
 };
 
 var COLORS = [

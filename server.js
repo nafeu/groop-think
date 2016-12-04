@@ -101,6 +101,7 @@ socket.on('registerUser', function(data){
       serverData.clientData[socket.id] = data;
       serverData.rooms[data.room].numActive = 1;
       serverData.rooms[data.room].hostId = socket.id;
+      socket.emit('setHost');
       socket.emit('render', {
         method: "game-state",
         content: serverData.rooms[data.room]

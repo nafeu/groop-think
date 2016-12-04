@@ -254,7 +254,7 @@ input {
 }
 
 #chat-user-typing {
-  padding: 15px;
+  padding: 0px 15px 0px 15px;
   font-size: 0.7em;
   text-align: center;
 }

@@ -1,6 +1,13 @@
 $(function(){
 console.log("Loading: dom-factory");
 
+function d(type, id, attrs) {
+  var out = $("<"+type+">");
+  if (id) out.attr("id", id);
+  if (attrs) out.attr(attrs);
+  return out;
+}
+
 domFactory = {
   build: {
     chatMessage: function(data) {
@@ -28,7 +35,10 @@ domFactory = {
     startingDisplay: function(data) {
       return domFactory.assets.gameBoard()
         .load("templates/game-rules.html", function(){
-          $(this).append(domFactory.assets.nextBtn("Click to start game."));
+          if (user.isHost)
+            $(this).append(domFactory.assets.hostLobby());
+          else
+            $(this).append(domFactory.assets.participantLobby());
         });
     },
     questionDisplay: function(data) {
@@ -46,7 +56,6 @@ domFactory = {
             return "showing winner in ";
           return "next question in ";
         }, 7));
-        // .append(domFactory.assets.activeNextBtn("next question"));
     },
     endingDisplay: function(data) {
       return domFactory.assets.gameBoard()
@@ -55,17 +64,34 @@ domFactory = {
     },
     disconnectDisplay: function() {
       return domFactory.assets.gameBoard()
-        .html('<h1>You have been disconnected</h1>');
+        .append(
+          d('h3').text("You have been disconnected from the server.")
+        )
+      ;
     }
   },
   assets: {
     gameBoard: function() {
-      return $("<div></div>").attr("id", "game-board");
+      return d('div', 'game-board');
+    },
+    hostLobby: function() {
+      return d('div', 'host-lobby')
+        .append(
+          domFactory.assets.nextBtn('Start Game.')
+        )
+      ;
+    },
+    participantLobby: function() {
+      return d('div', 'participant-lobby')
+        .append(
+          d('h2').text("Waiting for host to start...")
+        )
+      ;
     },
     question: function(data) {
-      return $("<div></div>").attr("id", "display-question")
+      return d('div', 'display-question')
         .append(
-          $("<div></div>")
+          d('div')
             .addClass("display-question-asker")
             .text(function(){
               if (data.currQuestion.by.length > 0)
@@ -75,16 +101,16 @@ domFactory = {
             })
         )
         .append(
-          $("<div></div>")
+          d('div')
             .addClass("display-question-text")
             .text(data.currQuestion.q)
         );
     },
     answers: function(data) {
-      var out = $("<div></div>").attr("id", "display-answers");
+      var out = d('div', 'display-answers');
       var choices = data.currQuestion.a;
       for (var i = 0; i < choices.length; i++) {
-        var choice = $("<div></div>")
+        var choice = d('div')
           .addClass("display-choice")
           .text(choices[i])
           .attr("onclick", "if (user.active) socket.emit('submitAnswer', { 'answer': " + i + "});");
@@ -93,18 +119,17 @@ domFactory = {
       return out;
     },
     players: function(data) {
-      var out = $("<div></div>").attr("id", "display-players");
+      var out = d('div', 'display-players');
       var playerIds = Object.keys(data.players);
       for (var i = 0; i < playerIds.length; i++) {
-        var player = $("<div></div>")
+        var player = d('div', "userId-"+data.players[playerIds[i]].name)
           .addClass("display-player")
-          .attr("id", "userId-"+data.players[playerIds[i]].name)
           .css("border-color", getUsernameColor(data.players[playerIds[i]].name));
-        var playerName = $("<div></div>")
+        var playerName = d('div')
           .addClass("display-player-name")
           .text(data.players[playerIds[i]].name)
           .css("color", getUsernameColor(data.players[playerIds[i]].name));
-        var playerScore = $("<div></div>")
+        var playerScore = d('div')
           .addClass("display-player-score")
           .text(data.players[playerIds[i]].score);
         player
@@ -115,20 +140,19 @@ domFactory = {
       return out;
     },
     scores: function(data) {
-      var out = $("<div></div>").attr("id", "display-scores");
+      var out = d('div', "display-scores");
       var playerIds = Object.keys(data.players);
       for (var i = 0; i < playerIds.length; i++) {
-        var player = $("<div></div>")
+        var player = d('div', "userId-"+data.players[playerIds[i]].name)
           .addClass("display-player")
-          .attr("id", "userId-"+data.players[playerIds[i]].name)
           .css("border-color", getResultColor(data.players[playerIds[i]]))
           .append(
-            $("<div></div>")
+            d('div')
               .addClass("display-player-name")
               .text(data.players[playerIds[i]].name)
               .css("color", getResultColor(data.players[playerIds[i]])))
           .append(
-            $("<div></div>")
+            d('div')
               .addClass("display-player-increment")
               .text(data.players[playerIds[i]].increment));
         out.append(player);
@@ -136,27 +160,26 @@ domFactory = {
       return out;
     },
     topAnswer: function(data) {
-      var out = $("<div></div>").attr("id", "display-popular");
+      var out = d('div', "display-popular");
       if (data.tiedScoreCounter > 1) {
         out.append(
-          $("<div></div>")
+          d('div')
             .addClass("display-popular-header")
             .text("Even split. No points! No majority!"));
       } else {
-        var answer = $("<div></div>")
+        var answer = d('div')
           .addClass("display-popular-top")
           .text(data.topAnswer);
         out.append(
-          $("<div></div>")
+          d('div')
             .addClass("display-popular-header")
             .text("The most popular answer was")
         .append(answer));
       }
       return out;
-
     },
     winner: function(data) {
-      var out = $("<div></div>").attr("id", "display-winner");
+      var out = d('div', 'display-winner');
       var playerIds = Object.keys(data.players);
       var winner = "";
       var highestScore = 0;
@@ -173,29 +196,27 @@ domFactory = {
       return out;
     },
     nextBtn: function(msg) {
-      return $("<h1></h1>").text(msg).click(function(){
+      return d('h1').text(msg).click(function(){
         socket.emit("nextState");
       });
     },
     activeNextBtn: function(msg) {
-      return $("<h1></h1>").text(msg).click(function(){
+      return d('h1').text(msg).click(function(){
         if (user.active) socket.emit("nextState");
       });
     },
     countdown: function(msg, seconds) {
-      return $("<div></div>")
-        .attr("id", "countdown-timer")
+      return d('div', "countdown-timer")
         .append(
-          $("<span></span>")
+          d('span')
             .text(msg)
             .addClass("countdown-timer-msg")
         )
         .append(
-          $("<span></span>")
-            .attr("id", "countdown-timer-num")
+          d('span', "countdown-timer-num")
             .text(seconds)
         );
-    }
+    },
   }
 };
 

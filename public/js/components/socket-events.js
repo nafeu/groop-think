@@ -34,3 +34,7 @@ socket.on('usersTyping', function(data){
     });
   }
 });
+
+socket.on('setHost', function(){
+  user.isHost = true;
+});
