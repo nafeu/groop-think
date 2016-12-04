@@ -26,6 +26,9 @@ UI = {
         if (data.content.type == "chat")
           this.printToChat(domFactory.build.chatMessage(data.content));
         break;
+      case "typing-update":
+        chatUserTyping.text(data.content);
+        break;
       case "add-class":
         $(data.content.id).addClass(data.content.class);
         break;

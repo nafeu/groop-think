@@ -122,7 +122,7 @@ socket.on('registerUser', function(data){
     });
     uiManager.printToChat(getRoom(socket.id), { type: "update", text: data.name + " has connected!"});
     uiManager.updateUsers(getRoom(socket.id));
-    debug.log("<< user ".green + socket.id + " joined room ".green + data.room + " at ".green + getTimeStamp().green + ">>".green, function(){
+    debug.log("\n<< user ".green + socket.id + " joined room ".green + data.room + " at ".green + getTimeStamp().green + ">>".green, function(){
       logRoomData(data.room);
     });
   }
@@ -146,6 +146,23 @@ socket.on('printToChat', function(data){
 
 socket.on('nextState', function(){
   statePusher.next(getRoom(socket.id));
+});
+
+socket.on('userStartedTyping', function(data) {
+  serverData.rooms[data.room].typing.push(data.name);
+  io.sockets.to(data.room).emit('usersTyping',
+    { typing: serverData.rooms[data.room].typing }
+  );
+});
+
+socket.on('userStoppedTyping', function(data) {
+  if (serverData.rooms[data.room].typing.length > 0) {
+    var index = serverData.rooms[data.room].typing.indexOf(data.name);
+    serverData.rooms[data.room].typing.splice(index, 1);
+  }
+  io.sockets.to(data.room).emit('usersTyping',
+    { typing: serverData.rooms[data.room].typing }
+  );
 });
 
 socket.on('submitAnswer', function(data){

@@ -41,9 +41,26 @@ usernameBox.enterKey(function(){
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');
-  if (msg.trim() !== "") {
+  if (msg.length > 0)
     socket.emit('printToChat', { type: "chat", user: user, message: msg });
+  if (user.isTyping) {
+    socket.emit("userStoppedTyping", { room: user.room, name: user.name });
+    user.isTyping = false;
   }
 });
 
+chatBox.keyup(function(){
+  if (!user.isTyping && chatBox.val().length > 0) {
+    socket.emit("userStartedTyping", { room: user.room, name: user.name });
+    user.isTyping = true;
+  }
+  else if (user.isTyping && chatBox.val().length < 1) {
+    socket.emit("userStoppedTyping", { room: user.room, name: user.name });
+    user.isTyping = false;
+  }
 });
+
+// chatBox.blur(function(){
+// });
+
+}); // Document Ready End

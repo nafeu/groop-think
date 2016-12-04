@@ -8,7 +8,8 @@ var socket = io({
 var user = {
   name: "",
   room: "",
-  active: false
+  active: false,
+  isTyping: false
 };
 
 var COLORS = [
@@ -24,6 +25,7 @@ var body,
   chat,
   onlineUsers,
   chatBox,
+  chatUserTyping,
   usernameBox,
   usernameWarn,
   roomBox,
@@ -50,6 +52,7 @@ room = $("#room");
 chat = $("#chat");
 onlineUsers = $("#online-users");
 chatBox = $("#chat-box");
+chatUserTyping = $("#chat-user-typing");
 usernameBox = $("#username-box");
 usernameWarn = $("#username-warn");
 roomBox = $("#room-box");

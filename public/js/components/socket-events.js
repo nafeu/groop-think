@@ -15,3 +15,22 @@ socket.on('disconnect', function(){
     }
   });
 });
+
+socket.on('usersTyping', function(data){
+  if ((user.isTyping && data.typing.length == 1) || data.typing.length === 0) {
+    UI.render({
+      method: "typing-update",
+      content: ""
+    });
+  } else {
+    var content = "";
+    if (data.typing.length > 1)
+      content = "multiple users are typing...";
+    else
+      content = data.typing[0] + " is typing...";
+    UI.render({
+      method: "typing-update",
+      content: content
+    });
+  }
+});

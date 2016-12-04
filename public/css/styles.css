@@ -53,6 +53,7 @@ input {
   overflow: auto;
   max-width: 100%;
   word-break: break-all;
+  padding-bottom: 0px;
 }
 
 #chat-box {
@@ -97,7 +98,7 @@ input {
   margin-bottom: 10px;
 }
 
-.chat-update-text, .label, .online-user-sep {
+.chat-update-text, .label, .online-user-sep, #chat-user-typing {
   color: #808B96;
 }
 
@@ -250,4 +251,10 @@ input {
   text-align: center;
   font-size: 2em;
   padding-bottom: 10px;
+}
+
+#chat-user-typing {
+  padding: 15px;
+  font-size: 0.7em;
+  text-align: center;
 }

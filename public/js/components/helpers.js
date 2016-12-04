@@ -4,7 +4,7 @@ console.log("Loading: helpers");
 // Helpers
 // ---------------------------------------------------------------------------------------
 function updateChatBoxSize() {
-  chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 40));
+  chat.css("height", (chatBox.offset().top - (onlineUsers.height() + 40) - 80));
 }
 
 function showRegistration() {

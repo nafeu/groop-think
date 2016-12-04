@@ -104,6 +104,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
         "tiedScoreCounter": 0,
         "winner": null,
         "players": {},
+        "typing": [],
         "deck": cards
       };
     }
