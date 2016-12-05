@@ -1,0 +1,54 @@
+// ---------------------------------------------------------------------------------------
+// Chat
+// ---------------------------------------------------------------------------------------
+
+#chat {
+  overflow: auto;
+  max-width: 100%;
+  word-break: break-all;
+  padding-bottom: 0px;
+}
+
+#chat-box {
+  width: 27%;
+  height: 20px;
+  padding: 20px;
+  font-size: 1em;
+  border-top: 1px solid #D5D8DC;
+  position: absolute;
+  bottom: 0;
+}
+
+#chat-stats {
+  border-bottom: 1px solid #D5D8DC;
+}
+
+#username-box {
+  font-size: 2em;
+}
+
+.chat-name, #online-users {
+  font-weight: bold;
+}
+
+.chat-message, .chat-update {
+  margin-bottom: 10px;
+}
+
+.chat-update-text, .label, .online-user-sep, #chat-user-typing {
+  color: #808B96;
+}
+
+.chat-update {
+  text-align: center;
+}
+
+.online-user-sep:last-child {
+  display: none;
+}
+
+#chat-user-typing {
+  padding: 0px 15px 0px 15px;
+  font-size: 0.7em;
+  text-align: center;
+}

@@ -1,0 +1,97 @@
+// ---------------------------------------------------------------------------------------
+// Main Game
+// ---------------------------------------------------------------------------------------
+
+#game-area {
+  padding: 12%;
+}
+
+#game-board h1, .display-choice, #room-create-btn, #room-join-btn {
+  cursor: pointer;
+}
+
+#game-board h1 {
+  text-align: center;
+}
+
+#display-question .display-question-asker {
+  font-size: 1.3em;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+#display-question .display-question-text {
+  font-size: 1.8em;
+  font-weight: bold;
+  padding: 0px 10px 0px 10px;
+  text-align: center;
+}
+
+#display-answers {
+  padding: 10px;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+#display-players, #display-popular, #display-scores {
+  padding: 10px;
+}
+
+.display-choice, .display-player {
+  border-radius: 10px;
+  font-size: 1.2em;
+  padding: 12px;
+  border: 1px solid;
+  display: inline-block;
+  margin: 10px;
+  transition: 500ms ease-in-out all;
+}
+
+.display-choice {
+  border-color: #e3e3e3;
+}
+
+.display-choice:hover {
+  border-color: black;
+}
+
+.display-player-name {
+  font-weight: bold;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.display-player-score {
+  font-weight: 100;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.submittedAnswer {
+  font-size: 0.7em;
+  opacity: 0.5;
+}
+
+#display-popular {
+  text-align: center;
+}
+
+#display-popular .display-popular-header {
+  font-size: 1.6em;
+}
+
+#display-popular .display-popular-top {
+  font-size: 1.7em;
+  font-weight: bold;
+}
+
+#countdown-timer {
+  font-size: 1.3em;
+  color: #e3e3e3;
+  text-align: center;
+}
+
+#display-winner {
+  text-align: center;
+  font-size: 2em;
+  padding-bottom: 10px;
+}

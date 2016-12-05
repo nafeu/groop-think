@@ -3,19 +3,20 @@ html, body, #content {
 
 body {
   margin: 0;
-  font-family: Helvetica, sans-serif; }
+  font-family: Helvetica, sans-serif;
+  background-color: orange; }
 
 p, h1, h2, h3 {
   margin: 0; }
-
-textarea:focus, input:focus {
-  outline: none; }
 
 input {
   border: none; }
 
 *:focus {
   outline: none; }
+
+.thin {
+  font-weight: 100; }
 
 #content {
   position: fixed;
@@ -59,19 +60,6 @@ input {
 #username-box {
   font-size: 2em; }
 
-#login, #room {
-  padding-left: 15%;
-  padding-top: 10%; }
-
-#login h1, #room h1 {
-  font-size: 3em;
-  margin-bottom: 5px; }
-
-#login h2, #room h2 {
-  margin-top: 5px;
-  font-weight: normal;
-  font-size: 1.5em; }
-
 .chat-name, #online-users {
   font-weight: bold; }
 
@@ -87,20 +75,29 @@ input {
 .online-user-sep:last-child {
   display: none; }
 
-#game-area {
-  padding: 12%; }
+#chat-user-typing {
+  padding: 0px 15px 0px 15px;
+  font-size: 0.7em;
+  text-align: center; }
 
-.red {
-  color: red; }
+#login, #room {
+  padding-left: 15%;
+  padding-top: 10%; }
+
+#login h1, #room h1 {
+  font-size: 3em;
+  margin-bottom: 5px; }
+
+#login h2, #room h2 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 1.5em; }
 
 #room-info-bar {
   position: fixed;
   left: 20px;
   bottom: 20px;
   font-size: 0.7em; }
-
-#game-board h1, .display-choice, #room-create-btn, #room-join-btn {
-  cursor: pointer; }
 
 #room-create-btn, #room-box, #room-join-btn {
   font-size: 1.5em;
@@ -131,6 +128,19 @@ input {
 
 #room h1, #room h3 {
   margin-bottom: 20px; }
+
+#room h1, #room h3 {
+  margin-bottom: 20px; }
+
+.or-sep {
+  display: inline-block;
+  padding-right: 10px; }
+
+#game-area {
+  padding: 12%; }
+
+#game-board h1, .display-choice, #room-create-btn, #room-join-btn {
+  cursor: pointer; }
 
 #game-board h1 {
   text-align: center; }
@@ -201,11 +211,3 @@ input {
   text-align: center;
   font-size: 2em;
   padding-bottom: 10px; }
-
-#chat-user-typing {
-  padding: 0px 15px 0px 15px;
-  font-size: 0.7em;
-  text-align: center; }
-
-.test {
-  color: blue; }

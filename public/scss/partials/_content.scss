@@ -1,0 +1,29 @@
+// ---------------------------------------------------------------------------------------
+// Content
+// ---------------------------------------------------------------------------------------
+
+#content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#page-left, #page-right {
+  float: left;
+  height: 100%;
+}
+
+#page-left {
+  width: 70%;
+  box-sizing: border-box;
+  border-right: 1px solid #D5D8DC;
+}
+
+#page-right {
+  width: 30%;
+}
+
+#game-area, #chat, #chat-stats, #login {
+  padding: 20px;
+}
