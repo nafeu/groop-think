@@ -2,6 +2,7 @@
 // Theme
 // ---------------------------------------------------------------------------------------
 
-$font-stack:    Helvetica, sans-serif;
-$primary-color: #333;
-$bg-color: orange;
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+$font-stack:    'Raleway', Helvetica, sans-serif;
+$primary-color: black;
+$bg-color: white;
