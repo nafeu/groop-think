@@ -13,6 +13,11 @@ var readline = require('readline');
 // Configuration
 // ---------------------------------------------------------------------------------------
 
+server.listen(process.env.PORT || 8000, function(){
+  console.log('<< Application server listening on '.blue.bold + server.address().port + ' >>'.blue.bold);
+  debug.prompt();
+});
+
 // Globals
 var serverData = {
   sockets: {},
@@ -195,14 +200,6 @@ socket.on('submitAnswer', function(data){
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
 // ---------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------
-// Server Config
-// ---------------------------------------------------------------------------------------
-server.listen(process.env.PORT || 3000, function(){
-  console.log('<< Application server listening on '.blue.bold + server.address().port + ' >>'.blue.bold);
-  debug.prompt();
-});
 
 // ---------------------------------------------------------------------------------------
 // Server API

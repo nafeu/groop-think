@@ -9,7 +9,7 @@ module.exports = function(rl) {
       }
     },
     prompt: function() {
-      rl.prompt();
+      if (process.env.DEBUG === "true") rl.prompt();
     }
   };
 };
