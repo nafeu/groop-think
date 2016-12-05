@@ -1,4 +1,4 @@
-console.log("Loading: helpers");
+ console.log("Loading: helpers");
 
 // ---------------------------------------------------------------------------------------
 // Helpers
@@ -51,13 +51,13 @@ function getResultColor(player) {
 function attemptRoomJoin() {
   var roomId = roomBox.val().trim();
   $.post("/api/rooms/join", { room: roomId }).done(function(data){
-    if (data.exists) {
+    if (data.joinable) {
       user.room = roomId;
       showRegistration();
     } else {
       UI.displayRoomWarn({
         color: "purple",
-        message: "That room does not exist."
+        message: data.message
       });
     }
   });
