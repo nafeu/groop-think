@@ -28,7 +28,7 @@ domFactory = {
       return domFactory.assets.gameBoard()
         .load("templates/game-rules.html", function(){
           if (user.isHost)
-            $(this).append(domFactory.assets.hostLobby());
+            $(this).append(domFactory.assets.hostLobby(data));
           else
             $(this).append(domFactory.assets.participantLobby());
         });
@@ -72,9 +72,11 @@ domFactory = {
     gameBoard: function() {
       return d('div', { id: 'game-board' });
     },
-    hostLobby: function() {
+    hostLobby: function(data) {
       return d('div', { id: 'host-lobby' })
         .append(
+          domFactory.assets.gameSettings(data),
+          domFactory.assets.shareBtn(),
           domFactory.assets.nextBtn('Start Game.')
         )
       ;
@@ -82,9 +84,32 @@ domFactory = {
     participantLobby: function() {
       return d('div', { id: 'participant-lobby' })
         .append(
+          domFactory.assets.shareBtn(),
           d('h2').text("Waiting for host to start...")
         )
       ;
+    },
+    gameSettings: function(data) {
+      return d('div', { id: 'game-settings' })
+        .append(
+          d('div')
+            .append(
+              d('div', { class: 'room-size-btn' }).text(data.roomSize).click(function(){
+                socket.emit('cycleRoomSize');
+              }),
+              d('div', { class: 'room-size-label' }).text("Room Size")
+            ),
+          d('div', { class: "game-length" })
+            .append(
+              d('div', { class: 'game-length-btn' }).text(data.gameLength).click(function(){
+                socket.emit('cycleGameLength');
+              }),
+              d('div', { class: 'game-length-label' }).text("Game Length")
+            )
+        );
+    },
+    shareBtn: function() {
+      return "<p>Share Btn...</p>";
     },
     question: function(data) {
       return d('div', { id: 'display-question' })

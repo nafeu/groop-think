@@ -101,7 +101,7 @@ saveClient(socket);
 socket.on('registerUser', function(data){
   if (!(serverData.rooms[data.room])) {
     gameDeck.fetchCards(function(cards, err){
-      serverData.rooms[data.room] = statePusher.createGameState(cards.slice(0), 3);
+      serverData.rooms[data.room] = statePusher.createGameState(cards.slice(0), 5);
       socket.join(data.room);
       serverData.clientData[socket.id] = data;
       serverData.rooms[data.room].numActive = 1;
@@ -195,6 +195,14 @@ socket.on('submitAnswer', function(data){
   if (currRoom.numAnswers >= currRoom.numActive) {
     statePusher.next(getRoom(socket.id));
   }
+});
+
+socket.on('cycleRoomSize', function(){
+  socket.emit('cycleRoomSize', { 'roomSize': cycleRoomSize(serverData.rooms[getRoom(socket.id)]) });
+});
+
+socket.on('cycleGameLength', function(){
+  socket.emit('cycleGameLength', { 'gameLength': cycleGameLength(serverData.rooms[getRoom(socket.id)]) });
 });
 
 // ---------------------------------------------------------------------------------------
@@ -358,6 +366,30 @@ function shortenQuestion(q) {
     return "null";
   }
 }
+
+function cycleRoomSize(roomRef) {
+  if (roomRef.roomSize == 20) {
+    if (roomRef.numActive > 1) roomRef.roomSize = roomRef.numActive;
+    else roomRef.roomSize = 2;
+  }
+  else
+  {
+    roomRef.roomSize++;
+  }
+  return roomRef.roomSize;
+}
+
+function cycleGameLength(roomRef) {
+  if (roomRef.gameLength == 20) {
+    roomRef.gameLength = 5;
+  }
+  else
+  {
+    roomRef.gameLength += 5;
+  }
+  return roomRef.gameLength;
+}
+
 
 function saveClient(socket) {
   debug.log("\n<< new client connected at ".green + getTimeStamp().green + " >>".green, function(){

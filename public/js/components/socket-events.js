@@ -38,3 +38,11 @@ socket.on('usersTyping', function(data){
 socket.on('setHost', function(){
   user.isHost = true;
 });
+
+socket.on('cycleRoomSize', function(data){
+  $("#game-settings .room-size-btn").text(data.roomSize);
+});
+
+socket.on('cycleGameLength', function(data){
+  $("#game-settings .game-length-btn").text(data.gameLength);
+});

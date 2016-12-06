@@ -4,8 +4,13 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
   return {
     next: function(room) {
       var self = this;
+      var activePlayers;
+      var currRoom;
       currRoom = serverData.rooms[room];
-      var activePlayers = Object.keys(currRoom.players);
+      if (currRoom)
+        activePlayers = Object.keys(currRoom.players);
+      else
+        currRoom = { phase: "closed" };
       switch (currRoom.phase) {
         case "start":
           var clientIds = [];
@@ -89,6 +94,9 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           currRoom.players = {};
           currRoom.phase = "start";
           break;
+        case "closed":
+          debug.log("---supressed attempted state-push on closed room".red);
+          break;
       }
       uiManager.renderState(room);
     },
@@ -105,6 +113,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
         "winner": null,
         "players": {},
         "typing": [],
+        "roomSize": 10,
         "deck": cards
       };
     }
