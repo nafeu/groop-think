@@ -85,7 +85,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           }
           break;
         case "end":
-          currRoom.gameLength = 3;
+          currRoom.gameLength = 5;
           currRoom.currQuestion = {};
           currRoom.numActive = 0;
           currRoom.numAnswers = 0;
