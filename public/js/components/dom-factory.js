@@ -77,7 +77,7 @@ domFactory = {
         .append(
           domFactory.assets.gameSettings(data),
           domFactory.assets.shareBtn(),
-          domFactory.assets.nextBtn('Start Game.')
+          domFactory.assets.gameStartBtn()
         )
       ;
     },
@@ -207,6 +207,11 @@ domFactory = {
         out.text("Ugh, it was a tie... Lame.");
       }
       return out;
+    },
+    gameStartBtn: function() {
+      return d('div', { id: 'game-start-btn' })
+        .text("Start Game.")
+        .on('click', function() { socket.emit('attemptGameStart', { room: user.room }); });
     },
     nextBtn: function(msg) {
       return d('h1').text(msg).click(function(){

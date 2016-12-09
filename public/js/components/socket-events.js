@@ -39,6 +39,17 @@ socket.on('setHost', function(){
   user.isHost = true;
 });
 
+socket.on('startGameSuccess', function(data) {
+  $("#game-start-btn").text(data.message).unbind('click');
+  setTimeout(function(){
+    socket.emit('nextState');
+  }, 3000);
+});
+
+socket.on('startGameFail', function(data) {
+  $("#game-start-btn").text(data.message);
+});
+
 socket.on('cycleRoomSize', function(data){
   $("#game-settings .room-size-btn").text(data.roomSize);
 });

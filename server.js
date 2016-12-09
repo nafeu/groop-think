@@ -205,6 +205,14 @@ socket.on('cycleGameLength', function(){
   socket.emit('cycleGameLength', { 'gameLength': cycleGameLength(serverData.rooms[getRoom(socket.id)]) });
 });
 
+socket.on('attemptGameStart', function(data){
+  if (serverData.rooms[data.room].numActive >= 2) {
+    socket.emit('startGameSuccess', { message: "starting game..." });
+  } else {
+    socket.emit('startGameFail', { message: "at least 2 players needed to start, try again" });
+  }
+});
+
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
 // ---------------------------------------------------------------------------------------
