@@ -77,10 +77,10 @@ UI = {
       .css("color", warning.color)
       .text(warning.message);
   },
-  displayRoomWarn: function(warning) {
-    roomWarn
-      .css("color", warning.color)
-      .text(warning.message);
+  displayStatusMessage: function(data) {
+    statusMessage
+      .css("color", data.color)
+      .text(data.message);
   },
   printToChat: function(data) {
     chat.append(data);

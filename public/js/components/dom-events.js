@@ -31,7 +31,7 @@ roomJoin.click(function(){
 });
 
 roomBox.on('input', function(){
-  roomWarn.html("");
+  statusMessage.html("");
 });
 
 usernameBox.enterKey(function(){

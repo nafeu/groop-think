@@ -59,7 +59,7 @@ function attemptRoomJoin() {
       user.room = roomId;
       showRegistration();
     } else {
-      UI.displayRoomWarn({
+      UI.displayStatusMessage({
         color: "purple",
         message: data.message
       });

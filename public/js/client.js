@@ -30,7 +30,7 @@ var body,
   usernameBox,
   usernameWarn,
   roomBox,
-  roomWarn,
+  statusMessage,
   roomCreate,
   roomInfoBar,
   roomInfoNotice,
@@ -39,7 +39,7 @@ var body,
   gameArea;
 
 // Component Vars
-var UI, domFactory;
+var UI, domFactory, queryVars;
 
 // ---------------------------------------------------------------------------------------
 $(function(){ // Document Ready - Start
@@ -57,7 +57,7 @@ chatUserTyping = $("#chat-user-typing");
 usernameBox = $("#username-box");
 usernameWarn = $("#username-warn");
 roomBox = $("#room-box");
-roomWarn = $("#room-warn");
+statusMessage = $("#status-message");
 roomCreate = $("#room-create-btn");
 roomInfoBar = $("#room-info-bar");
 roomInfoNotice = $("#room-info-notice");
@@ -71,14 +71,14 @@ $(window).resize(function () {
 });
 
 // Default User Actions
-var queryVars = $.parseQuery();
+queryVars = $.parseQuery();
 if (queryVars.room) {
   $.post("/api/rooms/join", { room: queryVars.room }).done(function(data){
     if (data.joinable) {
       user.room = queryVars.room;
       showRegistration();
     } else {
-      UI.displayRoomWarn({
+      UI.displayStatusMessage({
         color: "purple",
         message: 'Room "' + queryVars.room + '" ' + data.message
       });
