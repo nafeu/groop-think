@@ -76,7 +76,7 @@ domFactory = {
       return d('div', { id: 'host-lobby' })
         .append(
           domFactory.assets.gameSettings(data),
-          domFactory.assets.shareBtn(),
+          domFactory.assets.inviteBtn(),
           domFactory.assets.gameStartBtn()
         )
       ;
@@ -84,7 +84,7 @@ domFactory = {
     participantLobby: function() {
       return d('div', { id: 'participant-lobby' })
         .append(
-          domFactory.assets.shareBtn(),
+          domFactory.assets.inviteBtn(),
           d('h2').text("Waiting for host to start...")
         )
       ;
@@ -108,8 +108,13 @@ domFactory = {
             )
         );
     },
-    shareBtn: function() {
-      return "<p>Share Btn...</p>";
+    inviteBtn: function() {
+      return d('div', { id: 'invite-btn' })
+      .text("Invite your friends!")
+      .on('click', function(){
+        copyToClipboard(getCurrentUrl());
+        $(this).text("Invite link copied to clipboard.");
+      });
     },
     question: function(data) {
       return d('div', { id: 'display-question' })
@@ -232,6 +237,9 @@ domFactory = {
             .text(seconds)
         );
     },
+    homeBtn: function(label) {
+      return d('a', { href: "/" }).text(label);
+    }
   }
 };
 

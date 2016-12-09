@@ -30,10 +30,14 @@ function getUsernameColor(username) {
   return COLORS[index];
 }
 
-function copyToClipboard(element) {
+function getCurrentUrl() {
+  return window.location.href;
+}
+
+function copyToClipboard(content) {
   var $temp = $("<input>");
   $("body").append($temp);
-  $temp.val($(element).text()).select();
+  $temp.val(content).select();
   document.execCommand("copy");
   $temp.remove();
 }
