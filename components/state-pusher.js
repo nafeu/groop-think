@@ -2,10 +2,18 @@ var msgt = require('./msg-tools');
 
 module.exports = function(serverData, uiManager, gameDeck, debug) {
   return {
+    nextIn: function(room, delay) {
+      var self = this;
+      setTimeout(function(){
+        self.next(room);
+      }, delay);
+    },
     next: function(room) {
       var self = this;
       var activePlayers;
       var currRoom;
+      var questionTime = 3000; // Must match client side question countdown
+      var resultTime = 7000; // Must match client side result countdown
       currRoom = serverData.rooms[room];
       if (currRoom)
         activePlayers = Object.keys(currRoom.players);
@@ -13,6 +21,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
         currRoom = { phase: "closed" };
       switch (currRoom.phase) {
         case "start":
+          debug.log("<< Starting game in ".blue + room + " " + getTimeStamp().bold.blue + " >>".blue);
           var clientIds = [];
           Object.keys(serverData.clientData).forEach(function(cid){
             if (serverData.clientData[cid].room == room) {
@@ -26,50 +35,89 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
               score: 0,
               choice: null,
               taunt: null,
-              points: null
+              points: false
             };
             currRoom.players[clientIds[i]] = playerObj;
           }
           currRoom.currQuestion = gameDeck.drawCard(currRoom.deck);
           currRoom.gameLength--;
           currRoom.phase = "question";
+          debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
+          // Display the question for questionTime
+          self.nextIn(room, questionTime);
           break;
         case "question":
-          var resultCounter = [];
-          for (var j = 0; j < currRoom.currQuestion.a.length; j++) {
-            resultCounter.push(0);
-          }
-          for (var k = 0; k < activePlayers.length; k++) {
-            resultCounter[currRoom.players[activePlayers[k]].choice] += 1;
-          }
-          var majorityIdx = indexOfMax(resultCounter);
+          var resultCounter;
+          var majorityIdx;
           currRoom.tiedScoreCounter = 0;
+
+          // Fill up resultCounter with array of 0s
+          resultCounter = Array.apply(null, Array(currRoom.currQuestion.a.length))
+            .map(Number.prototype.valueOf,0);
+
+          // Go through everyones response if any and add increment the
+          // respective counter based on their choice idx
+          activePlayers.forEach(function(p){
+            if (currRoom.players[p].choice)
+              resultCounter[currRoom.players[p].choice] += 1;
+          });
+
+          // Find the index of the answer that sits in the majority
+          majorityIdx = indexOfMax(resultCounter);
           currRoom.topAnswer = currRoom.currQuestion.a[majorityIdx];
-          resultCounter.forEach(function(item){
-            if (item == resultCounter[majorityIdx]) {
+
+          // Check if there are any tied answers
+          resultCounter.forEach(function(c){
+            if (c == resultCounter[majorityIdx]) {
               currRoom.tiedScoreCounter++;
             }
           });
-          for (var l = 0; l < activePlayers.length; l++) {
-            if (currRoom.tiedScoreCounter > 1) {
-              currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.even();
-              currRoom.players[activePlayers[l]].points = false;
-            } else {
-              if (currRoom.players[activePlayers[l]].choice == majorityIdx) {
-                currRoom.players[activePlayers[l]].score += 1;
-                currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.majority();
-                currRoom.players[activePlayers[l]].points = true;
-              } else {
-                currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.minority();
-                currRoom.players[activePlayers[l]].points = false;
+
+          // Decide whether players gain points or not
+          activePlayers.forEach(function(p){
+            var selectedPlayer = currRoom.players[p];
+
+            // Case 1: No one answers
+            if (currRoom.numAnswers === 0)
+              selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
+
+            // Case 2: There is an even split
+            else if (currRoom.tiedScoreCounter > 1)
+              selectedPlayer.taunt = msgt.scoreMessages.even();
+
+            else
+            {
+              // Check if player answered at all
+              if (selectedPlayer.choice !== null) {
+                console.log(selectedPlayer.name + " answered a question...");
+
+                // Case 3: Player is in the majority
+                if (selectedPlayer.choice == majorityIdx)
+                {
+                  console.log(selectedPlayer.name + " gets points...");
+                  selectedPlayer.score += 1;
+                  selectedPlayer.taunt = msgt.scoreMessages.majority();
+                  selectedPlayer.points = true;
+                }
+
+                // Case 4: Player is in the minority
+                else
+                  selectedPlayer.taunt = msgt.scoreMessages.minority();
               }
+
+              // Case 5: Player did not answer
+              else
+                selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
             }
-          }
+
+            // Clear answer
+            selectedPlayer.choice = null;
+          });
+
           currRoom.phase = "result";
-          var interval = setInterval(function() {
-            self.next(room);
-            clearInterval(interval);
-          }, 7000);
+          debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
+          // Display the result for resultTime
+          self.nextIn(room, resultTime);
           break;
         case "result":
           if (currRoom.gameLength > 0) {
@@ -80,8 +128,12 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
             }
             currRoom.numAnswers = 0;
             currRoom.phase = "question";
+            debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
+            // Display the next question for questionTime
+            self.nextIn(room, questionTime);
           } else {
             currRoom.phase = "end";
+            debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
           }
           break;
         case "end":
@@ -133,4 +185,23 @@ function indexOfMax(arr) {
     }
   }
   return maxIndex;
+}
+
+function getTimeStamp() {
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var ampm = "AM";
+  if (hours > 12) {
+    hours -= 12;
+    ampm = "PM";
+  }
+  if (minutes < 10) {
+    minutes = "0"+minutes;
+  }
+  if (seconds < 10) {
+    seconds = "0"+seconds;
+  }
+  return hours + ":" + minutes + ":" + seconds + " " + ampm;
 }

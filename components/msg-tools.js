@@ -29,6 +29,13 @@ module.exports = {
       "Whatever, at least we unique y'all",
       "I'm a special snowflake"
     ],
+    noAnswerMessages: [
+      "I have no answer.",
+      "Sometimes the best opinion, is no opinion",
+      "Welp, looks like I don't know how this game works",
+      "No answer for me",
+      "It's okay I didn't want points anyways"
+    ],
     majority: function(){
       return this.majorityMessages[Math.floor(Math.random()*this.majorityMessages.length)] + ", +1";
     },
@@ -37,6 +44,9 @@ module.exports = {
     },
     even: function(){
       return this.evenMessages[Math.floor(Math.random()*this.evenMessages.length)];
+    },
+    noAnswer: function(){
+      return this.noAnswerMessages[Math.floor(Math.random()*this.noAnswerMessages.length)];
     }
   }
 };

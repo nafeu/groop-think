@@ -226,10 +226,10 @@ domFactory = {
     },
     countdownTimer: function(id, msg, seconds) {
       var interval = setInterval(function() {
+        $("#"+id+"-timer .timer-num").text(parseInt($("#"+id+"-timer .timer-num").text()) - 1);
         if ($("#"+id+"-timer .timer-num").text() == "1") {
           clearInterval(interval);
         }
-        $("#"+id+"-timer .timer-num").text(parseInt($("#"+id+"-timer .timer-num").text()) - 1);
       }, 1000);
       return d('div', { id: id+"-timer" })
         .append(
