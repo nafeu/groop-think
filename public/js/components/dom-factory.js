@@ -59,13 +59,6 @@ domFactory = {
           domFactory.assets.winner(data),
           domFactory.assets.nextBtn("Play again!")
         );
-    },
-    disconnectDisplay: function() {
-      return domFactory.assets.gameBoard()
-        .append(
-          d('h3').text("You have been disconnected from the server.")
-        )
-      ;
     }
   },
   assets: {

@@ -34,6 +34,17 @@ function getCurrentUrl() {
   return window.location.href;
 }
 
+function stripGetVars(url) {
+  if (url.includes("?"))
+    return url.split("?")[0];
+  else
+    return url;
+}
+
+function getStatusUrl(status) {
+  return stripGetVars(getCurrentUrl()) + "?status=" + status;
+}
+
 function copyToClipboard(content) {
   var $temp = $("<input>");
   $("body").append($temp);
