@@ -417,16 +417,14 @@ function removeClient(socket) {
     if (occupied.room) {
       if (serverData.rooms[occupied.room]) {
         var occupiedRoomRef = serverData.rooms[occupied.room];
+        delete occupiedRoomRef.players[socket.id];
+        if (occupiedRoomRef.numActive > 0)
+          occupiedRoomRef.numActive--;
         if (
             (occupiedRoomRef.numAnswers >= occupiedRoomRef.numActive) &&
             (occupiedRoomRef.phase == "question")) {
           statePusher.next(occupied.room);
         }
-        delete occupiedRoomRef.players[socket.id];
-        if (occupiedRoomRef.numActive > 0)
-          occupiedRoomRef.numActive--;
-        if (occupiedRoomRef.numAnswers > 0);
-          occupiedRoomRef.numAnswers--;
         if (occupiedRoomRef.hostId == socket.id)
           io.sockets.to(occupied.room).emit('sendHome', { status: "ended" });
         if (occupiedRoomRef.numActive === 0) {

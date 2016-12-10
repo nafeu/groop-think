@@ -25,7 +25,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
               name: serverData.clientData[clientIds[i]].name,
               score: 0,
               choice: null,
-              increment: null,
+              taunt: null,
               points: null
             };
             currRoom.players[clientIds[i]] = playerObj;
@@ -52,15 +52,15 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           });
           for (var l = 0; l < activePlayers.length; l++) {
             if (currRoom.tiedScoreCounter > 1) {
-              currRoom.players[activePlayers[l]].increment = msgt.scoreMessages.even();
+              currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.even();
               currRoom.players[activePlayers[l]].points = false;
             } else {
               if (currRoom.players[activePlayers[l]].choice == majorityIdx) {
                 currRoom.players[activePlayers[l]].score += 1;
-                currRoom.players[activePlayers[l]].increment = msgt.scoreMessages.majority();
+                currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.majority();
                 currRoom.players[activePlayers[l]].points = true;
               } else {
-                currRoom.players[activePlayers[l]].increment = msgt.scoreMessages.minority();
+                currRoom.players[activePlayers[l]].taunt = msgt.scoreMessages.minority();
                 currRoom.players[activePlayers[l]].points = false;
               }
             }
