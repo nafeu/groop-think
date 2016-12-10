@@ -416,18 +416,20 @@ function removeClient(socket) {
   if (occupied) {
     if (occupied.room) {
       if (serverData.rooms[occupied.room]) {
+        var occupiedRoomRef = serverData.rooms[occupied.room];
         if (
-            (serverData.rooms[occupied.room].numAnswers >= serverData.rooms[occupied.room].numActive) &&
-            (serverData.rooms[occupied.room].phase == "question")) {
+            (occupiedRoomRef.numAnswers >= occupiedRoomRef.numActive) &&
+            (occupiedRoomRef.phase == "question")) {
           statePusher.next(occupied.room);
         }
-        delete serverData.rooms[occupied.room].players[socket.id];
-        if (serverData.rooms[occupied.room].numActive > 0)
-          serverData.rooms[occupied.room].numActive--;
-        if (serverData.rooms[occupied.room].numAnswers > 0);
-          serverData.rooms[occupied.room].numAnswers--;
-        // TODO: Delete the user as well
-        if (serverData.rooms[occupied.room].numActive === 0) {
+        delete occupiedRoomRef.players[socket.id];
+        if (occupiedRoomRef.numActive > 0)
+          occupiedRoomRef.numActive--;
+        if (occupiedRoomRef.numAnswers > 0);
+          occupiedRoomRef.numAnswers--;
+        if (occupiedRoomRef.hostId == socket.id)
+          io.sockets.to(occupied.room).emit('sendHome', { status: "ended" });
+        if (occupiedRoomRef.numActive === 0) {
           debug.log("\n<< deleting empty room ".red + occupied.room + " at ".red + getTimeStamp().red + ">>".red);
           delete serverData.rooms[occupied.room];
         }

@@ -50,3 +50,7 @@ socket.on('cycleRoomSize', function(data){
 socket.on('cycleGameLength', function(data){
   $("#game-settings .game-length-btn").text(data.gameLength);
 });
+
+socket.on('sendHome', function(data) {
+  window.location.href = getStatusUrl(data.status);
+});
