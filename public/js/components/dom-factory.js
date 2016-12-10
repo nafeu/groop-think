@@ -46,7 +46,7 @@ domFactory = {
         .append(
           domFactory.assets.topAnswer(data),
           domFactory.assets.scores(data),
-          domFactory.assets.countdown(function(){
+          domFactory.assets.countdownTimer("countdown", function(){
             if (data.gameLength === 0)
               return "showing winner in ";
             return "next question in ";
@@ -78,7 +78,7 @@ domFactory = {
       return d('div', { id: 'participant-lobby' })
         .append(
           domFactory.assets.inviteBtn(),
-          d('h2').text("Waiting for host to start...")
+          d('div', { id: 'lobby-waiting-message' }).text("Waiting for host to start...")
         )
       ;
     },
@@ -221,17 +221,23 @@ domFactory = {
         if (user.active) socket.emit("nextState");
       });
     },
-    countdown: function(msg, seconds) {
-      return d('div', { id: "countdown-timer" })
-        .append(
-          d('span', { class: 'countdown-timer-msg' })
-            .text(msg),
-          d('span', { id: "countdown-timer-num" })
-            .text(seconds)
-        );
-    },
     homeBtn: function(label) {
       return d('a', { href: "/" }).text(label);
+    },
+    countdownTimer: function(id, msg, seconds) {
+      var interval = setInterval(function() {
+        if ($("#"+id+"-timer .timer-num").text() == "1") {
+          clearInterval(interval);
+        }
+        $("#"+id+"-timer .timer-num").text(parseInt($("#"+id+"-timer .timer-num").text()) - 1);
+      }, 1000);
+      return d('div', { id: id+"-timer" })
+        .append(
+          d('span', { class: 'timer-msg' })
+            .text(msg),
+          d('span', { class: "timer-num" })
+            .text(seconds)
+        );
     }
   }
 };

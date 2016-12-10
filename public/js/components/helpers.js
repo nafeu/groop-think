@@ -53,6 +53,17 @@ function copyToClipboard(content) {
   $temp.remove();
 }
 
+function convertToCounter(selector, message, seconds, counterId, completionFn) {
+  $(selector).html(message + ' <span id="'+counterId+'-counter">' + seconds + '</span>');
+  var interval = setInterval(function(){
+    if ($("#"+counterId+"-counter").text() == "1") {
+      if (completionFn) completionFn();
+      clearInterval(interval);
+    }
+    $("#"+counterId+"-counter").text(parseInt($("#"+counterId+"-counter").text()) - 1);
+  }, 1000);
+}
+
 function getResultColor(player) {
   if (player) {
     if (player.points)

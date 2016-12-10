@@ -51,14 +51,6 @@ UI = {
         if (gameState.phase == "result") {
           gameArea.empty();
           gameArea.append(domFactory.build.resultDisplay(gameState));
-          var counter = parseInt($("#countdown-timer-num").text());
-          var interval = setInterval(function() {
-            if (counter == 1) {
-              clearInterval(interval);
-            }
-            counter--;
-            $("#countdown-timer-num").text(counter);
-          }, 1000);
         }
         if (gameState.phase == "end") {
           user.active = false;

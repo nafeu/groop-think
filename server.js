@@ -213,6 +213,10 @@ socket.on('attemptGameStart', function(data){
   }
 });
 
+socket.on('startingGame', function(data){
+  io.sockets.to(data.room).emit('startingGame', { host: data.host });
+});
+
 // ---------------------------------------------------------------------------------------
 }); // IO Socket Connection End
 // ---------------------------------------------------------------------------------------

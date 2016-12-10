@@ -34,9 +34,17 @@ socket.on('setHost', function(){
 
 socket.on('startGameSuccess', function(data) {
   $("#game-start-btn").text(data.message).unbind('click');
-  setTimeout(function(){
+  socket.emit("startingGame", { room: user.room, host: socket.id });
+  convertToCounter("#game-start-btn", "Starting game in", 3, user.room, function(){
     socket.emit('nextState');
-  }, 3000);
+  });
+});
+
+socket.on('startingGame', function(data) {
+  console.log("received start game init...");
+  if (data.host != socket.id) {
+    convertToCounter("#lobby-waiting-message", "Starting game in", 3, user.room);
+  }
 });
 
 socket.on('startGameFail', function(data) {
