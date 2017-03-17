@@ -174,12 +174,20 @@ domFactory = {
       return out;
     },
     topAnswer: function(data) {
+      console.log("[ DEBUG ] : Looking for top answer: ", data);
       var out = d('div', { id: 'display-popular' });
       if (data.tiedScoreCounter > 1) {
         out.append(
           d('div', { class: 'display-popular-header' })
-            .text("Even split. No points! No majority!"));
-      } else {
+            .text("SPLIT"));
+      }
+      else if (data.numAnswers === 0) {
+        out.append(
+          d('div', { class: 'display-popular-header' })
+            .text("NOBODY ANSWERED"));
+      }
+      else
+      {
         var answer = d('div', { class: 'display-popular-top' })
           .text(data.topAnswer);
         out.append(

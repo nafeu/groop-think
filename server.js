@@ -402,7 +402,6 @@ function cycleGameLength(roomRef) {
   return roomRef.gameLength;
 }
 
-
 function saveClient(socket) {
   debug.log("\n<< new client connected at ".green + getTimeStamp().green + " >>".green, function(){
     console.log("id: ".green, socket.id);

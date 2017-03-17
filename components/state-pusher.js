@@ -2,17 +2,19 @@ var msgt = require('./msg-tools');
 
 module.exports = function(serverData, uiManager, gameDeck, debug) {
   return {
-    nextIn: function(room, delay) {
+    nextIn: function(room, delay, oldState) {
       var self = this;
+      var currRoom = serverData.rooms[room];
       setTimeout(function(){
-        self.next(room);
+        if (currRoom.phase == oldState)
+          self.next(room);
       }, delay);
     },
     next: function(room) {
       var self = this;
       var activePlayers;
       var currRoom;
-      var questionTime = 3000; // Must match client side question countdown
+      var questionTime = 5000; // Must match client side question countdown
       var resultTime = 7000; // Must match client side result countdown
       currRoom = serverData.rooms[room];
       if (currRoom)
@@ -44,7 +46,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           currRoom.phase = "question";
           debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
           // Display the question for questionTime
-          self.nextIn(room, questionTime);
+          self.nextIn(room, questionTime, "question");
           break;
         case "question":
           var resultCounter;
@@ -55,16 +57,22 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           resultCounter = Array.apply(null, Array(currRoom.currQuestion.a.length))
             .map(Number.prototype.valueOf,0);
 
+          console.log("Setup result counter: ", resultCounter);
+
           // Go through everyones response if any and add increment the
           // respective counter based on their choice idx
           activePlayers.forEach(function(p){
-            if (currRoom.players[p].choice)
+            if (currRoom.players[p].choice !== null)
               resultCounter[currRoom.players[p].choice] += 1;
           });
+
+          console.log("Increment counters based on answers: ", resultCounter);
 
           // Find the index of the answer that sits in the majority
           majorityIdx = indexOfMax(resultCounter);
           currRoom.topAnswer = currRoom.currQuestion.a[majorityIdx];
+
+          console.log("Get the majority IDX: ", majorityIdx, " for: ", resultCounter);
 
           // Check if there are any tied answers
           resultCounter.forEach(function(c){
@@ -73,23 +81,32 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
             }
           });
 
+          console.log("Set the tied score counter: ", currRoom.tiedScoreCounter, " for: ", resultCounter);
+
           // Decide whether players gain points or not
           activePlayers.forEach(function(p){
             var selectedPlayer = currRoom.players[p];
+            selectedPlayer.points = false;
 
             // Case 1: No one answers
-            if (currRoom.numAnswers === 0)
+            if (resultCounter.reduce(getSum) === 0) {
+              console.log("Condition met: NO ONE ANSWERED");
               selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
+            }
 
             // Case 2: There is an even split
-            else if (currRoom.tiedScoreCounter > 1)
+            else if (currRoom.tiedScoreCounter > 1) {
+              console.log("Condition met: EVEN SPLIT");
               selectedPlayer.taunt = msgt.scoreMessages.even();
+            }
 
             else
             {
+              console.log("Condition met: SOMEONE ANSWERED");
               // Check if player answered at all
               if (selectedPlayer.choice !== null) {
                 console.log(selectedPlayer.name + " answered a question...");
+                console.log(selectedPlayer.choice + " was their answer...");
 
                 // Case 3: Player is in the majority
                 if (selectedPlayer.choice == majorityIdx)
@@ -109,28 +126,25 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
               else
                 selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
             }
-
-            // Clear answer
-            selectedPlayer.choice = null;
           });
-
+          // Reset room state vars
           currRoom.phase = "result";
           debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
           // Display the result for resultTime
-          self.nextIn(room, resultTime);
+          self.nextIn(room, resultTime, "result");
           break;
         case "result":
           if (currRoom.gameLength > 0) {
             currRoom.currQuestion = gameDeck.drawCard(currRoom.deck);
             currRoom.gameLength--;
-            for (var m = 0; m < activePlayers.length; m++) {
-              currRoom.players[activePlayers[m]].choice = null;
-            }
+            activePlayers.forEach(function(p){
+              currRoom.players[p].choice = null;
+            });
             currRoom.numAnswers = 0;
             currRoom.phase = "question";
             debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
             // Display the next question for questionTime
-            self.nextIn(room, questionTime);
+            self.nextIn(room, questionTime, "question");
           } else {
             currRoom.phase = "end";
             debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
@@ -139,7 +153,8 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
         case "end":
           currRoom.gameLength = 5;
           currRoom.currQuestion = {};
-          currRoom.numActive = 0;
+          currRoom.numActive = Object.keys(currRoom.players).length;
+          currRoom.tiedScoreCounter = null;
           currRoom.numAnswers = 0;
           currRoom.topAnswer = null;
           currRoom.winner = null;
@@ -204,4 +219,8 @@ function getTimeStamp() {
     seconds = "0"+seconds;
   }
   return hours + ":" + minutes + ":" + seconds + " " + ampm;
+}
+
+function getSum(total, num) {
+    return total + num;
 }
