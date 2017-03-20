@@ -36,7 +36,7 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
               name: serverData.clientData[clientIds[i]].name,
               score: 0,
               choice: null,
-              taunt: null,
+              result: null,
               points: false
             };
             currRoom.players[clientIds[i]] = playerObj;
@@ -91,13 +91,13 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
             // Case 1: No one answers
             if (resultCounter.reduce(getSum) === 0) {
               console.log("Condition met: NO ONE ANSWERED");
-              selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
+              selectedPlayer.result = msgt.scoreMessages.noAnswer();
             }
 
             // Case 2: There is an even split
             else if (currRoom.tiedScoreCounter > 1) {
               console.log("Condition met: EVEN SPLIT");
-              selectedPlayer.taunt = msgt.scoreMessages.even();
+              selectedPlayer.result = msgt.scoreMessages.even();
             }
 
             else
@@ -113,18 +113,18 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
                 {
                   console.log(selectedPlayer.name + " gets points...");
                   selectedPlayer.score += 1;
-                  selectedPlayer.taunt = msgt.scoreMessages.majority();
+                  selectedPlayer.result = msgt.scoreMessages.majority();
                   selectedPlayer.points = true;
                 }
 
                 // Case 4: Player is in the minority
                 else
-                  selectedPlayer.taunt = msgt.scoreMessages.minority();
+                  selectedPlayer.result = msgt.scoreMessages.minority();
               }
 
               // Case 5: Player did not answer
               else
-                selectedPlayer.taunt = msgt.scoreMessages.noAnswer();
+                selectedPlayer.result = msgt.scoreMessages.noAnswer();
             }
           });
           // Reset room state vars

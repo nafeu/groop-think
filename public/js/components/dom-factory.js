@@ -166,8 +166,8 @@ domFactory = {
           d('div', { class: 'display-player-name' })
             .text(data.players[playerId].name)
             .css("color", getResultColor(data.players[playerId])),
-          d('div', { class: 'display-player-taunt' })
-            .text(data.players[playerId].taunt)
+          d('div', { class: 'display-player-result' })
+            .text(data.players[playerId].result)
         );
         out.append(player);
       });

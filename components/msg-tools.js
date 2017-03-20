@@ -36,17 +36,22 @@ module.exports = {
       "No answer for me",
       "It's okay I didn't want points anyways"
     ],
+    // TODO: Re-evaluate whether or not taunt messages should be included
     majority: function(){
-      return this.majorityMessages[Math.floor(Math.random()*this.majorityMessages.length)] + ", +1";
+      // return this.majorityMessages[Math.floor(Math.random()*this.majorityMessages.length)] + ", +1";
+      return "+1";
     },
     minority: function(){
-      return this.minorityMessages[Math.floor(Math.random()*this.minorityMessages.length)] + ", no points";
+      // return this.minorityMessages[Math.floor(Math.random()*this.minorityMessages.length)] + ", no points";
+      return "";
     },
     even: function(){
-      return this.evenMessages[Math.floor(Math.random()*this.evenMessages.length)];
+      // return this.evenMessages[Math.floor(Math.random()*this.evenMessages.length)];
+      return "";
     },
     noAnswer: function(){
-      return this.noAnswerMessages[Math.floor(Math.random()*this.noAnswerMessages.length)];
+      // return this.noAnswerMessages[Math.floor(Math.random()*this.noAnswerMessages.length)];
+      return "";
     }
   }
 };
