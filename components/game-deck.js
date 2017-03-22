@@ -55,7 +55,7 @@ module.exports = {
         cb(null, e);
       });
     } else {
-      cb(require('../data/deck.json'), null);
+      cb(require('../data/sample-deck.json'), null);
     }
   },
   drawCard: function(deck) {
