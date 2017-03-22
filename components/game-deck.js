@@ -1,5 +1,15 @@
-var config = require("../config.js");
 var http = require('http');
+
+var config;
+
+try {
+  config = require("../config.js");
+}
+catch(err) {
+  config = {};
+}
+
+var deckUrl = process.env.DECK_URL || config.deck_url;
 
 module.exports = {
   defaults: [
@@ -32,8 +42,8 @@ module.exports = {
     }
   ],
   fetchCards: function(cb) {
-    if (config.deck_url) {
-      http.get(config.deck_url, function(res){
+    if (deckUrl) {
+      http.get(deckUrl, function(res){
         var body = '';
         res.on('data', function(chunk){
           body += chunk;

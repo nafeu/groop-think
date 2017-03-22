@@ -4,7 +4,6 @@ var http = require('http');
 var server = require('http').Server(app);
 var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
-var config = require('./config.js');
 var gameDeck = require('./components/game-deck');
 var colors = require('colors');
 var readline = require('readline');
