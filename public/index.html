@@ -5,7 +5,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <body>
     <div id="room" style="display: none;">
-      <h1>Groop Think!</h1>
+      <p id="title-text">Groop Think!</p>
       <h3>Where popular opinion is finally worth something.</h3>
       <div id="room-create-btn" type="text">Create new room</div>
       <p class="or-sep">OR</p>
@@ -16,8 +16,9 @@
     <div id="login" style="display: none;">
       <h1>Please pick a username.</h1>
       <input id="username-box" type="text" placeholder="enter a new name">
-      <h2 id="username-warn"></h2>
+      <a id="username-confirm">Confirm</a>
       <a class="cancel-btn" href="/">Cancel</a>
+      <h2 id="username-warn"></h2>
     </div>
     <div id="content" style="display: none;">
       <div id="page-left">

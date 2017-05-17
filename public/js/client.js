@@ -28,6 +28,7 @@ var body,
   chatUserTyping,
   usernameBox,
   usernameWarn,
+  usernameConfirm,
   roomBox,
   statusMessage,
   roomCreate,
@@ -55,6 +56,7 @@ chatBox = $("#chat-box");
 chatUserTyping = $("#chat-user-typing");
 usernameBox = $("#username-box");
 usernameWarn = $("#username-warn");
+usernameConfirm = $("#username-confirm");
 roomBox = $("#room-box");
 statusMessage = $("#status-message");
 roomCreate = $("#room-create-btn");

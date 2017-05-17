@@ -38,6 +38,10 @@ usernameBox.enterKey(function(){
   registerUser(usernameBox.val().trim());
 });
 
+usernameConfirm.click(function(){
+  registerUser(usernameBox.val().trim());
+});
+
 chatBox.enterKey(function(){
   var msg = chatBox.val();
   chatBox.val('');

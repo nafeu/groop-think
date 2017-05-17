@@ -8,48 +8,72 @@
 }
 
 #login h1, #room h1 {
-  font-size: 3em;
+  font-size: 4em;
   margin-bottom: 5px;
+  font-weight: bolder;
+}
+
+#title-text {
+  font-size: 4.5em;
+  margin-bottom: 5px;
+  font-weight: bolder;
 }
 
 #login h2, #room h2 {
   margin-top: 5px;
   font-weight: normal;
-  font-size: 1.5em;
+  font-size: 2em;
 }
 
-#room-create-btn, #room-box, #room-join-btn {
+#room-create-btn,
+#room-box,
+#room-join-btn,
+#username-box,
+#username-confirm,
+.cancel-btn {
   font-size: 1.5em;
   margin: 10px 10px 10px 0px;
-  padding: 10px;
-  display: inline-block; }
+  padding: 15px;
+  display: inline-block;
+  background-color: $primary-color;
+  color: $secondary-color;
+  transition: 300ms ease-in-out opacity;
+}
 
-#room-create-btn:hover {
-  border-color: red;
-  color: red; }
-
-#room-create-btn, #room-join-btn {
-  border: 1px solid black;
-  border-radius: 10px; }
+#room-create-btn:hover,
+#room-join-btn:hover,
+#username-confirm:hover,
+.cancel-btn:hover {
+  opacity: 0.8;
+}
 
 #room-box, #username-box {
-  border-bottom: 1px solid black; }
+  background-color: white;
+  color: $primary-color;
+}
 
 #room-box {
-  width: 140px; }
+  width: 140px;
+}
+
+.cancel-btn {
+  text-decoration: none;
+  background-color: $warning;
+}
 
 .thin {
-  font-weight: 100; }
+  font-weight: 100;
+}
 
 .or-sep {
   display: inline-block;
   padding-right: 10px; }
 
 #room h1, #room h3 {
-  margin-bottom: 20px; }
+  margin-bottom: 10px; }
 
 #room h1, #room h3 {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .or-sep {
