@@ -85,19 +85,20 @@ domFactory = {
     gameSettings: function(data) {
       return d('div', { id: 'game-settings' })
         .append(
-          d('div')
+          d('h3', { class: 'game-rule-title' }).text("Settings:"),
+          d('div', { class: "room-size" })
             .append(
+              d('div', { class: 'room-size-label' }).text("Room Size"),
               d('div', { class: 'room-size-btn' }).text(data.roomSize).click(function(){
                 socket.emit('cycleRoomSize');
-              }),
-              d('div', { class: 'room-size-label' }).text("Room Size")
+              })
             ),
           d('div', { class: "game-length" })
             .append(
+              d('div', { class: 'game-length-label' }).text("Game Length"),
               d('div', { class: 'game-length-btn' }).text(data.gameLength).click(function(){
                 socket.emit('cycleGameLength');
-              }),
-              d('div', { class: 'game-length-label' }).text("Game Length")
+              })
             )
         );
     },

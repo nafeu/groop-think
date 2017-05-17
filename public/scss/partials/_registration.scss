@@ -30,6 +30,7 @@
 #room-join-btn,
 #username-box,
 #username-confirm,
+#home-btn,
 .cancel-btn {
   font-size: 1.5em;
   margin: 10px 10px 10px 0px;
@@ -81,4 +82,13 @@
   padding-right: 10px;
 }
 
+#home-btn {
+  text-decoration: none;
+  padding: 10px;
+  font-size: 1em;
+  transition: 300ms ease-in-out opacity;
+}
 
+#home-btn:hover {
+  opacity: 0.8;
+}

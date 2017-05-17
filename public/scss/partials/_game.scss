@@ -101,3 +101,75 @@
   font-size: 2em;
   padding-bottom: 10px;
 }
+
+.game-rule-title {
+  font-size: 2em;
+  text-align: center;
+}
+
+.game-rule-bullet {
+  font-size: 1.25em;
+  list-style: none;
+  text-align: center;
+}
+
+.game-rule-bullet:last-child {
+  padding-bottom: 10px;
+}
+
+.clear-fix {
+  height: 10px;
+  width: 100%;
+}
+
+.room-size, .game-length {
+  width: 50%;
+  display: inline-block;
+}
+
+.room-size-label, .game-length-label {
+  text-align: center;
+  font-size: 1.5em;
+  padding-bottom: 0px;
+  text-decoration: underline;
+}
+
+.room-size-btn, .game-length-btn {
+  text-align: center;
+  font-size: 3em;
+  display: block;
+  cursor: pointer;
+  font-weight: bolder;
+}
+
+.room-size-btn:hover, .game-length-btn:hover {
+  opacity: 0.8;
+}
+
+#invite-btn, #game-start-btn {
+  text-align: center;
+  padding: 10px;
+  background-color: $primary-color;
+  color: $secondary-color;
+  margin: 0px 10% 5px 10%;
+  cursor: pointer;
+  transition: 300ms ease-in-out opacity;
+}
+
+#lobby-waiting-message {
+  font-size: 1.5em;
+  padding: 10px;
+  text-align: center;
+}
+
+#invite-btn {
+  margin-top: 20px;
+}
+
+#game-start-btn {
+  background-color: $success;
+}
+
+#invite-btn:hover, #game-start-btn:hover {
+  opacity: 0.8;
+}
