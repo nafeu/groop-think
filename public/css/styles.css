@@ -5,8 +5,8 @@ html, body, #content {
 body {
   margin: 0;
   font-family: "Raleway", Helvetica, sans-serif;
-  background-color: white;
-  color: black; }
+  background-color: #ecf0f1;
+  color: #2c3e50; }
 
 p, h1, h2, h3 {
   margin: 0; }
@@ -32,11 +32,11 @@ input {
 
 #page-left {
   width: 70%;
-  box-sizing: border-box;
-  border-right: 1px solid #D5D8DC; }
+  box-sizing: border-box; }
 
 #page-right {
-  width: 30%; }
+  width: 30%;
+  background-color: #112233; }
 
 #game-area, #chat, #chat-stats, #login {
   padding: 20px; }
@@ -52,12 +52,12 @@ input {
   height: 20px;
   padding: 20px;
   font-size: 1em;
-  border-top: 1px solid #D5D8DC;
   position: absolute;
-  bottom: 0; }
+  bottom: 0;
+  background-color: white; }
 
 #chat-stats {
-  border-bottom: 1px solid #D5D8DC; }
+  background-color: #10171e; }
 
 #username-box {
   font-size: 2em; }
@@ -66,10 +66,11 @@ input {
   font-weight: bold; }
 
 .chat-message, .chat-update {
+  color: #FFF;
   margin-bottom: 10px; }
 
 .chat-update-text, .label, .online-user-sep, #chat-user-typing {
-  color: #808B96; }
+  color: #6f8197; }
 
 .chat-update {
   text-align: center; }

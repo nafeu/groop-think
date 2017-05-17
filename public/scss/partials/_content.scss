@@ -17,11 +17,12 @@
 #page-left {
   width: 70%;
   box-sizing: border-box;
-  border-right: 1px solid #D5D8DC;
+  // border-right: 1px solid #D5D8DC;
 }
 
 #page-right {
   width: 30%;
+  background-color: $bg-color-chat-body
 }
 
 #game-area, #chat, #chat-stats, #login {

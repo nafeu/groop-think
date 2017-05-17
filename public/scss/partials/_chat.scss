@@ -14,13 +14,13 @@
   height: 20px;
   padding: 20px;
   font-size: 1em;
-  border-top: 1px solid #D5D8DC;
   position: absolute;
   bottom: 0;
+  background-color: $bg-color-chat-message;
 }
 
 #chat-stats {
-  border-bottom: 1px solid #D5D8DC;
+  background-color: $bg-color-chat-top;
 }
 
 #username-box {
@@ -32,11 +32,12 @@
 }
 
 .chat-message, .chat-update {
+  color: $chat-text-msg;
   margin-bottom: 10px;
 }
 
 .chat-update-text, .label, .online-user-sep, #chat-user-typing {
-  color: #808B96;
+  color: $chat-text-update;
 }
 
 .chat-update {
