@@ -1,14 +1,14 @@
 {
-  "name": "phraksocket",
+  "name": "groop-think",
   "version": "1.0.0",
   "description": "",
-  "main": "apps.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "gulp bower && DEBUG=false node server.js"
   },
   "author": "Nafeu Nasir",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.2",
     "colors": "^1.1.2",
