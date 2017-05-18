@@ -14,7 +14,6 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
       var self = this;
       var activePlayers;
       var currRoom;
-      var questionTime = 5000; // Must match client side question countdown
       var resultTime = 7000; // Must match client side result countdown
       currRoom = serverData.rooms[room];
       if (currRoom)
@@ -45,8 +44,6 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
           currRoom.gameLength--;
           currRoom.phase = "question";
           debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
-          // Display the question for questionTime
-          self.nextIn(room, questionTime, "question");
           break;
         case "question":
           var resultCounter;
@@ -143,8 +140,6 @@ module.exports = function(serverData, uiManager, gameDeck, debug) {
             currRoom.numAnswers = 0;
             currRoom.phase = "question";
             debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);
-            // Display the next question for questionTime
-            self.nextIn(room, questionTime, "question");
           } else {
             currRoom.phase = "end";
             debug.log("<< State for ".blue + room + " is now ".blue + currRoom.phase + " " + getTimeStamp().bold.blue + " >>".blue);

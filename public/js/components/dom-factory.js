@@ -48,8 +48,8 @@ domFactory = {
           domFactory.assets.scores(data),
           domFactory.assets.countdownTimer("countdown", function(){
             if (data.gameLength === 0)
-              return "showing winner in ";
-            return "next question in ";
+              return "prepare to see the winner...";
+            return "prepare for next question... ";
           }, 7)
         );
     },
@@ -233,19 +233,11 @@ domFactory = {
     homeBtn: function(label) {
       return d('a', { href: "/" }).text(label);
     },
-    countdownTimer: function(id, msg, seconds) {
-      var interval = setInterval(function() {
-        $("#"+id+"-timer .timer-num").text(parseInt($("#"+id+"-timer .timer-num").text()) - 1);
-        if ($("#"+id+"-timer .timer-num").text() == "1") {
-          clearInterval(interval);
-        }
-      }, 1000);
+    countdownTimer: function(id, msg) {
       return d('div', { id: id+"-timer" })
         .append(
           d('span', { class: 'timer-msg' })
-            .text(msg),
-          d('span', { class: "timer-num" })
-            .text(seconds)
+            .text(msg)
         );
     }
   }
