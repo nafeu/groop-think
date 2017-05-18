@@ -74,6 +74,14 @@ function getResultColor(player) {
   return "purple";
 }
 
+function lockAnswer(index) {
+  if (user.active && !user.answered) {
+    socket.emit('submitAnswer', { 'answer': index });
+    $("#choice-"+index).addClass('lockAnswer');
+    user.answered = true;
+  }
+}
+
 function attemptRoomJoin() {
   var roomId = roomBox.val().trim();
   $.post("/api/rooms/join", { room: roomId }).done(function(data){

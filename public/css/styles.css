@@ -193,16 +193,15 @@ input {
   padding: 10px; }
 
 .display-choice, .display-player {
-  border-radius: 10px;
   font-size: 1.2em;
   padding: 12px;
-  border: 1px solid;
   display: inline-block;
   margin: 10px;
   transition: 500ms ease-in-out all; }
 
 .display-choice {
-  border-color: #e3e3e3; }
+  background-color: white;
+  color: #2c3e50; }
 
 .display-choice:hover {
   border-color: black; }
@@ -210,12 +209,14 @@ input {
 .display-player-name {
   font-weight: bold;
   font-size: 1.3em;
-  text-align: center; }
+  text-align: center;
+  color: #ecf0f1; }
 
 .display-player-score {
   font-weight: 100;
   font-size: 1.5em;
-  text-align: center; }
+  text-align: center;
+  color: #ecf0f1; }
 
 .submittedAnswer {
   font-size: 0.7em;
@@ -299,3 +300,7 @@ input {
 
 #invite-btn:hover, #game-start-btn:hover {
   opacity: 0.8; }
+
+.lockAnswer {
+  background-color: #2c3e50;
+  color: #ecf0f1; }

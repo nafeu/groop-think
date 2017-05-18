@@ -40,6 +40,7 @@ UI = {
           gameArea.append(domFactory.build.startingDisplay(gameState));
         }
         if (gameState.phase == "question") {
+          user.answered = false;
           gameArea.empty();
           gameArea.append(domFactory.build.questionDisplay(gameState));
           $.each(gameState.players, function(key){

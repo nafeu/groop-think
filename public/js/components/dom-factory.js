@@ -128,9 +128,9 @@ domFactory = {
       var out = d('div', { id: 'display-answers' });
       var choices = data.currQuestion.a;
       choices.forEach(function(answer, index){
-        var choice = d('div', { class: 'display-choice' })
+        var choice = d('div', { class: 'display-choice', id: "choice-" + index })
           .text(answer)
-          .attr("onclick", "if (user.active) socket.emit('submitAnswer', { 'answer': " + index + "});");
+          .attr("onclick", "lockAnswer(" + index + ")");
         out.append(choice);
       });
       return out;
@@ -143,10 +143,9 @@ domFactory = {
             id: "userId-"+data.players[playerId].name,
             class: "display-player",
           })
-          .css("border-color", getUsernameColor(data.players[playerId].name));
+          .css("background-color", getUsernameColor(data.players[playerId].name));
         var playerName = d('div', { class: 'display-player-name' })
-          .text(data.players[playerId].name)
-          .css("color", getUsernameColor(data.players[playerId].name));
+          .text(data.players[playerId].name);
         var playerScore = d('div', { class: 'display-player-score' })
           .text(data.players[playerId].score);
         player.append(playerName, playerScore);

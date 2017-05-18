@@ -43,17 +43,16 @@
 }
 
 .display-choice, .display-player {
-  border-radius: 10px;
   font-size: 1.2em;
   padding: 12px;
-  border: 1px solid;
   display: inline-block;
   margin: 10px;
   transition: 500ms ease-in-out all;
 }
 
 .display-choice {
-  border-color: #e3e3e3;
+  background-color: white;
+  color: $primary-color;
 }
 
 .display-choice:hover {
@@ -64,12 +63,14 @@
   font-weight: bold;
   font-size: 1.3em;
   text-align: center;
+  color: $secondary-color
 }
 
 .display-player-score {
   font-weight: 100;
   font-size: 1.5em;
   text-align: center;
+  color: $secondary-color
 }
 
 .submittedAnswer {
@@ -172,4 +173,9 @@
 
 #invite-btn:hover, #game-start-btn:hover {
   opacity: 0.8;
+}
+
+.lockAnswer {
+  background-color: $primary-color;
+  color: $secondary-color;
 }
